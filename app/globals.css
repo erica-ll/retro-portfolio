@@ -29,3 +29,33 @@ body {
 .MenuBar-module_menuBar {
   min-height: 40px !important;
 }
+
+/* Allow windows to collapse to title-bar height (windowshade effect).
+   Resize minHeight prop still constrains drag-resize; this only lifts the CSS floor. */
+.Window-module_window {
+  min-height: 0 !important;
+}
+
+/* YouTube IFrame API player — sizes the container and generated iframe to fill the video area */
+#yt-player-root {
+  position: absolute;
+  inset: 0;
+}
+#yt-player-root iframe {
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+  display: block !important;
+}
+
+/* Boot-up animations */
+@keyframes powerPulse {
+  0%, 100% { opacity: 0.55; }
+  50%       { opacity: 1; }
+}
+
+@keyframes crtFlash {
+  0%   { opacity: 1; }
+  40%  { opacity: 0.85; }
+  100% { opacity: 0; }
+}
