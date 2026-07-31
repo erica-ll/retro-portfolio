@@ -47,7 +47,7 @@ function Clock() {
     return () => clearInterval(id);
   }, []);
   return (
-    <span style={{ fontSize: 12, fontFamily: "var(--font-system)" }}>{time}</span>
+    <span style={{ fontSize: 12, fontFamily: "var(--font-body-mono)" }}>{time}</span>
   );
 }
 
@@ -207,6 +207,126 @@ function VideoIcon({ selected }: { selected?: boolean }) {
   );
 }
 
+// Self-contained YouTube QuickTime-style player. Manages its own player ref and state.
+function VideoPlayer({ videoId, maximized, onToggleMaximize }: {
+  videoId: string;
+  maximized: boolean;
+  onToggleMaximize: () => void;
+}) {
+  const [playing, setPlaying] = useState(false);
+  const [started, setStarted] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const playerRef = useRef<any>(null);
+  const divRef = useRef<HTMLDivElement>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const isDraggingRef = useRef(false);
+  const seekBarRef = useRef<HTMLDivElement>(null);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (playerRef.current) { try { playerRef.current.destroy(); } catch {} playerRef.current = null; }
+      if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
+    };
+  }, []);
+
+  // Create YT player when user first presses play
+  useEffect(() => {
+    if (!started) return;
+    const tryCreate = () => {
+      if (playerRef.current || !divRef.current) return;
+      const w = window as any;
+      if (!w.YT?.Player) return;
+      playerRef.current = new w.YT.Player(divRef.current, {
+        width: "100%", height: "100%",
+        videoId,
+        playerVars: { controls: 0, autoplay: 1, modestbranding: 1, rel: 0, iv_load_policy: 3, playsinline: 1 },
+        events: {
+          onStateChange: ({ data }: { data: number }) => {
+            if (data === 1) {
+              setPlaying(true);
+              if (intervalRef.current) clearInterval(intervalRef.current);
+              intervalRef.current = setInterval(() => {
+                const p = playerRef.current;
+                if (!p?.getCurrentTime) return;
+                const cur: number = p.getCurrentTime();
+                const dur: number = p.getDuration();
+                if (dur > 0) setProgress(cur / dur);
+              }, 300);
+            } else if (data === 2 || data === 0 || data === -1) {
+              setPlaying(false);
+              if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
+            }
+          },
+        },
+      });
+    };
+    const w = window as any;
+    if (w.YT?.Player) tryCreate();
+    else { const prev = w.onYouTubeIframeAPIReady; w.onYouTubeIframeAPIReady = () => { prev?.(); tryCreate(); }; }
+  }, [started, videoId]);
+
+  // Global mouse events for seek drag
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      if (!isDraggingRef.current || !seekBarRef.current || !playerRef.current) return;
+      const rect = seekBarRef.current.getBoundingClientRect();
+      const f = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      const dur: number = playerRef.current.getDuration?.() ?? 0;
+      if (dur > 0) { playerRef.current.seekTo(f * dur, true); setProgress(f); }
+    };
+    const onUp = () => { isDraggingRef.current = false; };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => { window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onUp); };
+  }, []);
+
+  const handlePlayPause = () => {
+    if (!started) { setStarted(true); return; }
+    if (playing) playerRef.current?.pauseVideo();
+    else playerRef.current?.playVideo();
+  };
+
+  const handleSeekDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!started || !playerRef.current) return;
+    e.preventDefault();
+    isDraggingRef.current = true;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const f = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const dur: number = playerRef.current.getDuration?.() ?? 0;
+    if (dur > 0) { playerRef.current.seekTo(f * dur, true); setProgress(f); }
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      <div style={{ flex: 1, background: "#0d0d0d", position: "relative", minHeight: 0, overflow: "hidden" }}>
+        {started && (
+          <div className="yt-player-wrapper">
+            <div ref={divRef} />
+          </div>
+        )}
+        {started && <div style={{ position: "absolute", inset: 0, zIndex: 1, cursor: "default" }} onClick={handlePlayPause} />}
+        {!started && (
+          <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 3px), #0d0d0d", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10 }}>
+            <div onClick={handlePlayPause} style={{ width: 52, height: 52, borderRadius: "50%", border: "2px solid #777", background: "radial-gradient(circle at 38% 32%, #5a5a5a, #1a1a1a)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#ccc", fontSize: 20, paddingLeft: 4, boxShadow: "0 0 14px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.12)" }}>▶</div>
+            <span style={{ color: "#444", fontSize: 9, fontFamily: "var(--font-body-mono)", letterSpacing: "0.14em" }}>CLICK TO PLAY</span>
+          </div>
+        )}
+      </div>
+      <div style={{ background: "linear-gradient(180deg, #c8c8c8 0%, #a0a0a0 50%, #888 100%)", borderTop: "1px solid #555", padding: "4px 8px", display: "flex", alignItems: "center", gap: 6, flexShrink: 0, boxShadow: "inset 0 1px 0 rgba(255,255,255,0.4)" }}>
+        <button onClick={handlePlayPause} style={{ width: 22, height: 22, borderRadius: 3, border: "1px solid #555", background: "linear-gradient(180deg, #e0e0e0 0%, #b8b8b8 100%)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 10, color: "#222", flexShrink: 0, boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6), 0 1px 1px rgba(0,0,0,0.3)" }}>{playing ? "■" : "▶"}</button>
+        <div ref={seekBarRef} onMouseDown={handleSeekDown} style={{ flex: 1, height: 10, position: "relative", background: "linear-gradient(180deg, #3a3a3a 0%, #555 100%)", borderRadius: 4, border: "1px solid #2a2a2a", boxShadow: "inset 0 1px 2px rgba(0,0,0,0.6)", cursor: started ? "pointer" : "default", userSelect: "none", overflow: "visible" }}>
+          <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${progress * 100}%`, background: "linear-gradient(90deg, #6aaee0, #4888c8)", borderRadius: 4, overflow: "visible" }}>
+            {started && <div style={{ position: "absolute", right: -5, top: "50%", transform: "translateY(-50%)", width: 10, height: 10, borderRadius: "50%", background: "linear-gradient(180deg, #f0f0f0 0%, #c0c0c0 100%)", border: "1px solid #444", boxShadow: "0 1px 3px rgba(0,0,0,0.5)", pointerEvents: "none" }} />}
+          </div>
+        </div>
+        <span style={{ fontSize: 9, fontWeight: "bold", fontFamily: "var(--font-body-mono)", color: "#444", letterSpacing: "0.04em", flexShrink: 0 }}>QT</span>
+        <button onClick={onToggleMaximize} title={maximized ? "Restore" : "Maximize"} style={{ width: 22, height: 22, borderRadius: 3, border: "1px solid #555", background: "linear-gradient(180deg, #e0e0e0 0%, #b8b8b8 100%)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 11, color: "#222", flexShrink: 0, boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6), 0 1px 1px rgba(0,0,0,0.3)" }}>{maximized ? "⊟" : "⊞"}</button>
+      </div>
+    </div>
+  );
+}
+
 function DesktopIcon({
   src,
   label,
@@ -244,7 +364,7 @@ function DesktopIcon({
         style={{
           color: "white",
           fontSize: 10,
-          fontFamily: "var(--font-system)",
+          fontFamily: "var(--font-display)",
           padding: "1px 4px",
           background: selected ? "#000080" : "transparent",
           borderRadius: 2,
@@ -341,7 +461,7 @@ const MENUS = [
 
 const PROJECT = {
   id: "my-project",
-  title: "My Project",
+  title: "Creatures in TV",
   description:
     "A full-stack web application built with Next.js, TypeScript, and PostgreSQL. Features user authentication, real-time updates, and a responsive design.",
   tech: ["Next.js", "TypeScript", "PostgreSQL", "Tailwind CSS"],
@@ -352,8 +472,7 @@ const PROJECT = {
 type SubWin = {
   id: string;
   projectName: string;
-  file: string | null;
-  selectedItem: string | null;
+  kind: "about" | "video";
   pos: { x: number; y: number };
   size: { width: number; height: number };
   collapsed: boolean;
@@ -370,18 +489,16 @@ export default function Home() {
   const [documentsRestoreSize, setDocumentsRestoreSize] = useState({ width: 400, height: 280 });
   const [documentsRestorePos,  setDocumentsRestorePos]  = useState({ x: 40, y: 30 });
   const [documentsSize,        setDocumentsSize]        = useState({ width: 400, height: 280 });
-  // Per-project sub-windows (Mac OS 9 style: each project opens its own window)
   const [subWins, setSubWins] = useState<SubWin[]>([]);
-  const [vrVideoPlaying,    setVrVideoPlaying]    = useState(false);
-  const [vrStarted,         setVrStarted]         = useState(false);
-  const [videoProgress,     setVideoProgress]     = useState(0);
+  // Which project is currently viewed inside the Projects window (null = root)
+  const [documentsCurrentProject, setDocumentsCurrentProject] = useState<string | null>(null);
   const [activeWindow, setActiveWindow] = useState<string | null>(null);
   const [printerOpen,        setPrinterOpen]        = useState(false);
   const [printerCollapsed,   setPrinterCollapsed]   = useState(false);
   const [printerMaximized,   setPrinterMaximized]   = useState(false);
   const [printerPos,         setPrinterPos]         = useState({ x: 20, y: 20 });
-  const [printerSize,        setPrinterSize]        = useState({ width: 460, height: 520 });
-  const [printerRestoreSize, setPrinterRestoreSize] = useState({ width: 460, height: 520 });
+  const [printerSize,        setPrinterSize]        = useState({ width: 520, height: 520 });
+  const [printerRestoreSize, setPrinterRestoreSize] = useState({ width: 520, height: 520 });
   const [printerRestorePos,  setPrinterRestorePos]  = useState({ x: 20, y: 20 });
   const [readmeOpen,        setReadmeOpen]        = useState(false);
   const [readmeCollapsed,   setReadmeCollapsed]   = useState(false);
@@ -391,13 +508,8 @@ export default function Home() {
   const [readmeRestoreSize, setReadmeRestoreSize] = useState({ width: 640, height: 460 });
   const [readmeRestorePos,  setReadmeRestorePos]  = useState({ x: 30, y: 20 });
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
-  const desktopRef         = useRef<HTMLDivElement>(null);
-  const bootedRef          = useRef(false);
-  const ytPlayerRef        = useRef<any>(null);
-  const ytDivRef           = useRef<HTMLDivElement>(null);
-  const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const isDraggingRef      = useRef(false);
-  const seekBarRef         = useRef<HTMLDivElement>(null);
+  const desktopRef = useRef<HTMLDivElement>(null);
+  const bootedRef  = useRef(false);
   const [booted,    setBooted]    = useState(false);
   const [zoomScale, setZoomScale] = useState(1);
   const [crtFlash,  setCrtFlash]  = useState(false);
@@ -432,32 +544,6 @@ export default function Home() {
     }
   }, []);
 
-  // Global mouse events for seek-bar drag (refs are always fresh — no stale closure)
-  useEffect(() => {
-    const onMove = (e: MouseEvent) => {
-      if (!isDraggingRef.current || !seekBarRef.current || !ytPlayerRef.current) return;
-      const rect = seekBarRef.current.getBoundingClientRect();
-      const f = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-      const dur: number = ytPlayerRef.current.getDuration?.() ?? 0;
-      if (dur > 0) { ytPlayerRef.current.seekTo(f * dur, true); setVideoProgress(f); }
-    };
-    const onUp = () => { isDraggingRef.current = false; };
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
-    return () => { window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onUp); };
-  }, []);
-
-  const cleanupVideoPlayer = () => {
-    if (ytPlayerRef.current) {
-      try { ytPlayerRef.current.destroy(); } catch { /* ignore */ }
-      ytPlayerRef.current = null;
-    }
-    if (progressIntervalRef.current) { clearInterval(progressIntervalRef.current); progressIntervalRef.current = null; }
-    setVrVideoPlaying(false);
-    setVrStarted(false);
-    setVideoProgress(0);
-  };
-
   const clearSelection = () => setSelectedIcon(null);
 
   const openDocuments = () => {
@@ -466,41 +552,37 @@ export default function Home() {
     setSelectedIcon(null);
   };
 
-  // Mac OS 9–style: each project folder opens its own window
+  // Navigate Projects window into a project folder (no new SubWin — in-place navigation)
   const openProject = (projectName: string) => {
-    const existing = subWins.find(w => w.projectName === projectName);
+    setDocumentsCurrentProject(projectName);
+    setActiveWindow("documents");
+  };
+
+  // Open a file as its own independent window; focus if already open
+  const openFileWindow = (projectName: string, kind: SubWin["kind"]) => {
+    const existing = subWins.find(w => w.projectName === projectName && w.kind === kind);
     if (existing) { setActiveWindow(existing.id); return; }
-    const id = `${projectName}-${Date.now()}`;
-    const offset = subWins.length * 20;
+    const id = `${projectName}-${kind}-${Date.now()}`;
+    const isAbout = kind === "about";
+    // about.txt: larger window, left-leaning; video: smaller, right-leaning
+    const pos  = isAbout ? { x: 18, y: 22 }  : { x: 400, y: 48 };
+    const size = isAbout ? { width: 580, height: 460 } : { width: 440, height: 330 };
     setSubWins(prev => [...prev, {
-      id, projectName, file: null, selectedItem: null,
-      pos: { x: 60 + offset, y: 50 + offset },
-      size: { width: 420, height: 300 },
+      id, projectName, kind,
+      pos, size,
       collapsed: false, maximized: false,
-      restoreSize: { width: 420, height: 300 },
-      restorePos: { x: 60 + offset, y: 50 + offset },
+      restoreSize: size, restorePos: pos,
     }]);
     setActiveWindow(id);
   };
 
-  const closeSubWin = (id: string, projectName: string) => {
-    if (projectName === "VR Escape Room") cleanupVideoPlayer();
+  const closeSubWin = (id: string) => {
     setSubWins(prev => prev.filter(w => w.id !== id));
     setActiveWindow(null);
   };
 
   const updateSubWin = (id: string, update: Partial<SubWin>) => {
     setSubWins(prev => prev.map(w => w.id === id ? { ...w, ...update } : w));
-  };
-
-  const openSubWinFile = (win: SubWin, filename: string) => {
-    if (win.file === "demo.mp4" && filename !== "demo.mp4") cleanupVideoPlayer();
-    updateSubWin(win.id, { file: filename, selectedItem: null });
-  };
-
-  const closeSubWinFile = (win: SubWin) => {
-    if (win.file === "demo.mp4") cleanupVideoPlayer();
-    updateSubWin(win.id, { file: null, selectedItem: null });
   };
 
   const toggleSubWinMaximize = (win: SubWin) => {
@@ -513,74 +595,6 @@ export default function Home() {
     } else {
       updateSubWin(win.id, { size: win.restoreSize, pos: win.restorePos, maximized: false });
     }
-  };
-
-  // Create / destroy YouTube IFrame player when vrStarted toggles
-  useEffect(() => {
-    if (!vrStarted) {
-      if (ytPlayerRef.current) {
-        try { ytPlayerRef.current.destroy(); } catch { /* ignore */ }
-        ytPlayerRef.current = null;
-      }
-      if (progressIntervalRef.current) { clearInterval(progressIntervalRef.current); progressIntervalRef.current = null; }
-      return;
-    }
-    const tryCreate = () => {
-      if (ytPlayerRef.current || !ytDivRef.current) return;
-      const w = window as any;
-      if (!w.YT?.Player) return;
-      ytPlayerRef.current = new w.YT.Player(ytDivRef.current, {
-        width: "100%", height: "100%",
-        videoId: "gVotu8LDLiQ",
-        playerVars: { controls: 0, autoplay: 1, modestbranding: 1, rel: 0, iv_load_policy: 3, playsinline: 1 },
-        events: {
-          onStateChange: ({ data }: { data: number }) => {
-            if (data === 1) { // playing
-              setVrVideoPlaying(true);
-              if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
-              progressIntervalRef.current = setInterval(() => {
-                const p = ytPlayerRef.current;
-                if (!p?.getCurrentTime) return;
-                const cur: number = p.getCurrentTime();
-                const dur: number = p.getDuration();
-                if (dur > 0) setVideoProgress(cur / dur);
-              }, 300);
-            } else if (data === 2 || data === 0 || data === -1) { // paused, ended, unstarted
-              setVrVideoPlaying(false);
-              if (progressIntervalRef.current) { clearInterval(progressIntervalRef.current); progressIntervalRef.current = null; }
-            }
-          },
-        },
-      });
-    };
-    const w = window as any;
-    if (w.YT?.Player) {
-      tryCreate();
-    } else {
-      const prev = w.onYouTubeIframeAPIReady;
-      w.onYouTubeIframeAPIReady = () => { prev?.(); tryCreate(); };
-    }
-  }, [vrStarted]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const handleFirstPlay = () => setVrStarted(true);
-
-  const handlePlayPause = () => {
-    if (!vrStarted) { handleFirstPlay(); return; }
-    if (vrVideoPlaying) {
-      ytPlayerRef.current?.pauseVideo();
-    } else {
-      ytPlayerRef.current?.playVideo();
-    }
-  };
-
-  const handleSeekBarMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!vrStarted || !ytPlayerRef.current) return;
-    e.preventDefault();
-    isDraggingRef.current = true;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const f = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    const dur: number = ytPlayerRef.current.getDuration?.() ?? 0;
-    if (dur > 0) { ytPlayerRef.current.seekTo(f * dur, true); setVideoProgress(f); }
   };
 
   const toggleMaximize = () => {
@@ -770,8 +784,8 @@ export default function Home() {
                 onOpen={openDocuments}
               />
               <DesktopIcon
-                src="/printer.png"
-                label="Printer"
+                src="/resume-icon.png"
+                label="resume.pdf"
                 selected={selectedIcon === "printer"}
                 onSelect={() => setSelectedIcon("printer")}
                 onOpen={openPrinter}
@@ -811,9 +825,10 @@ export default function Home() {
                     background: "#fff",
                     height: "100%",
                     overflowY: "auto",
-                    fontFamily: "var(--font-system)",
+                    fontFamily: "var(--font-body-mono)",
                     fontSize: 13,
                     color: "#111",
+                    letterSpacing: "-0.03em",
                   }}>
                     <div style={{ padding: "20px 24px" }}>
 
@@ -837,9 +852,7 @@ export default function Home() {
                         fontSize: 12,
                         lineHeight: 1.7,
                         color: "#333",
-                        marginBottom: 16,
-                        paddingBottom: 14,
-                        borderBottom: "1px solid #ddd",
+                        marginBottom: 8,
                       }}>
                         I&apos;m a CS grad student at Columbia (MS, Dec 2026), coming from UCSB where I studied
                         Computer Science and Philosophy — a combination that still shapes how I think about systems
@@ -852,11 +865,273 @@ export default function Home() {
                         build.
                       </div>
 
-                      {/* Experience */}
-                      <div style={{ fontSize: 11, fontWeight: "bold", letterSpacing: "0.06em", color: "#888", marginBottom: 10 }}>
-                        EXPERIENCE
+                    </div>
+                  </div>
+                </Window>
+              </div>
+            )}
+
+            {/* Projects — single-pane file browser */}
+            {documentsOpen && (
+              <div onMouseDown={() => setActiveWindow("documents")} style={{ display: "contents" }}>
+                <Window
+                  title={documentsCurrentProject ?? "Projects"}
+                  active={activeWindow === "documents"}
+                  draggable
+                  resizable={!documentsCollapsed}
+                  position={documentsPos}
+                  onPositionChange={setDocumentsPos}
+                  width={documentsSize.width}
+                  height={documentsCollapsed ? TITLEBAR_H : documentsSize.height}
+                  onResize={(size) => setDocumentsSize(size)}
+                  titleBar={
+                    <MacTitleBar
+                      title={documentsCurrentProject ?? "Projects"}
+                      onPositionChange={setDocumentsPos}
+                      onClose={() => { setDocumentsOpen(false); setDocumentsCurrentProject(null); setActiveWindow(null); setDocumentsCollapsed(false); setDocumentsMaximized(false); }}
+                      onCollapse={() => setDocumentsCollapsed(c => !c)}
+                      onZoom={toggleMaximize}
+                    />
+                  }
+                >
+                  {documentsCurrentProject === null ? (
+                    /* Root: all project folders */
+                    <div style={{ flex: 1, overflowY: "auto", padding: 16, display: "grid", gridTemplateColumns: "repeat(auto-fill, 80px)", gap: "16px 12px", alignItems: "start", justifyContent: "start" }}>
+                      <IconButton icon={<FolderIcon />} label={PROJECT.title} labelPosition="bottom" size="lg"
+                        style={{ background: "transparent", border: "none", boxShadow: "none" }}
+                        onDoubleClick={(e) => { e.stopPropagation(); openProject("Creatures in TV"); }} />
+                      <IconButton icon={<FolderIcon />} label="VR Escape Room" labelPosition="bottom" size="lg"
+                        style={{ background: "transparent", border: "none", boxShadow: "none" }}
+                        onDoubleClick={(e) => { e.stopPropagation(); openProject("VR Escape Room"); }} />
+                      <IconButton icon={<FolderIcon />} label="Zoo XR" labelPosition="bottom" size="lg"
+                        style={{ background: "transparent", border: "none", boxShadow: "none" }}
+                        onDoubleClick={(e) => { e.stopPropagation(); openProject("Zoo XR"); }} />
+                    </div>
+                  ) : (
+                    /* Project view: back button + file icons */
+                    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+                      <div style={{ padding: "4px 10px", borderBottom: "1px solid #ccc", background: "#f0f0f0", flexShrink: 0 }}>
+                        <button
+                          onClick={() => setDocumentsCurrentProject(null)}
+                          style={{ border: "1px solid #aaa", borderRadius: 2, background: "#e0e0e0", padding: "1px 8px", cursor: "pointer", fontSize: 10, fontFamily: "var(--font-body-mono)" }}
+                        >← Projects</button>
+                      </div>
+                      <div style={{ flex: 1, overflowY: "auto", padding: 16, display: "grid", gridTemplateColumns: "repeat(auto-fill, 80px)", gap: "16px 12px", alignItems: "start", justifyContent: "start" }}>
+                        <IconButton
+                          icon={<img src="/readme-icon.png" width={40} height={40} alt="" draggable={false} />}
+                          label="about.txt" labelPosition="bottom" size="lg"
+                          style={{ background: "transparent", border: "none", boxShadow: "none" }}
+                          onDoubleClick={(e) => { e.stopPropagation(); openFileWindow(documentsCurrentProject, "about"); }}
+                        />
+                        {(documentsCurrentProject === "VR Escape Room" || documentsCurrentProject === "Zoo XR") && (
+                          <IconButton
+                            icon={<VideoIcon />}
+                            label="demo.mp4" labelPosition="bottom" size="lg"
+                            style={{ background: "transparent", border: "none", boxShadow: "none" }}
+                            onDoubleClick={(e) => { e.stopPropagation(); openFileWindow(documentsCurrentProject, "video"); }}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </Window>
+              </div>
+            )}
+
+            {/* File windows — each opened file is its own independent window */}
+            {subWins.map(win => (
+              <div key={win.id} onMouseDown={() => setActiveWindow(win.id)} style={{ display: "contents" }}>
+                <Window
+                  title={win.kind === "about" ? "about.txt" : "demo.mp4"}
+                  active={activeWindow === win.id}
+                  draggable
+                  resizable={!win.collapsed}
+                  position={win.pos}
+                  onPositionChange={(p) => updateSubWin(win.id, { pos: p })}
+                  width={win.size.width}
+                  height={win.collapsed ? TITLEBAR_H : win.size.height}
+                  onResize={(size) => updateSubWin(win.id, { size })}
+                  titleBar={
+                    <MacTitleBar
+                      title={win.kind === "about" ? `about.txt — ${win.projectName}` : `demo.mp4 — ${win.projectName}`}
+                      onPositionChange={(p) => updateSubWin(win.id, { pos: p })}
+                      onClose={() => closeSubWin(win.id)}
+                      onCollapse={() => updateSubWin(win.id, { collapsed: !win.collapsed })}
+                      onZoom={() => toggleSubWinMaximize(win)}
+                    />
+                  }
+                >
+                  {/* VR Escape Room — about.txt */}
+                  {win.kind === "about" && win.projectName === "VR Escape Room" && (
+                    <div style={{ height: "100%", overflowY: "auto", padding: "14px 18px", fontFamily: "var(--font-body-mono)", fontSize: 11, letterSpacing: "-0.03em", color: "#222" }}>
+                      <h2 style={{ fontSize: 14, fontWeight: "bold", marginBottom: 3 }}>VR Escape Room: Chrono Paradox</h2>
+                      <div style={{ fontSize: 10, color: "#888", marginBottom: 10, fontStyle: "italic" }}>Meta Quest · Unity · Multi-Stage Puzzle VR</div>
+                      <p style={{ lineHeight: 1.7, marginBottom: 14, color: "#333" }}>
+                        A thematic VR escape room developed for the Meta Quest, utilizing Unity and the Meta XR SDK.
+                        The experience integrates continuous locomotion, precise object manipulation, and spatial UI to guide
+                        players through a multi-stage puzzle sequence across two rooms representing the past and the future.
+                      </p>
+                      <div style={{ fontSize: 9, fontWeight: "bold", letterSpacing: "0.08em", color: "#888", marginBottom: 6, textTransform: "uppercase" }}>Core Systems</div>
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontWeight: "bold", fontSize: 11, marginBottom: 4, color: "#111" }}>Dynamic Asset Swapping (Time Barrier)</div>
+                        <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Engineered a spatial trigger system that updates 3D meshes and materials in real-time. When grabbed objects cross a localized "time barrier," their visual states transition between future and retro aesthetics without interrupting the XR grab interaction.</p>
+                      </div>
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontWeight: "bold", fontSize: 11, marginBottom: 4, color: "#111" }}>Real-Time Spatial Minimap</div>
+                        <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Architected a dynamic wayfinding system that continuously tracks the player&apos;s spatial transform data and mathematically maps it to a responsive 2D UI interface.</p>
+                      </div>
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontWeight: "bold", fontSize: 11, marginBottom: 4, color: "#111" }}>State-Driven UI Markers</div>
+                        <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Implemented an event-driven logic system for map markers. Exploration flags automatically update their visual states (from unexplored to completed) by listening to specific puzzle triggers and player location data.</p>
+                      </div>
+                      <div style={{ marginBottom: 14 }}>
+                        <div style={{ fontWeight: "bold", fontSize: 11, marginBottom: 4, color: "#111" }}>Collaborative Systems Design</div>
+                        <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Co-designed the core logic and puzzles with teammates, linking exploratory tasks (e.g., the bookshelf passcode search) with mechanical obstacles (e.g., the buzz-wire challenge) to construct a complete escape sequence.</p>
+                      </div>
+                      <div style={{ borderTop: "1px solid #ddd", paddingTop: 10, fontSize: 10, color: "#666", lineHeight: 1.8 }}>
+                        <div><strong>Platform:</strong> Meta Quest</div>
+                        <div><strong>Tech Stack:</strong> Unity 3D | C# | Meta XR SDK | XR Interaction Toolkit (XRI) | Spatial UI</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Video player — shared component, picks videoId by project */}
+                  {win.kind === "video" && (
+                    <VideoPlayer
+                      videoId={win.projectName === "VR Escape Room" ? "tJwE_XEiMno" : "YYU9Jj6YMrg"}
+                      maximized={win.maximized}
+                      onToggleMaximize={() => toggleSubWinMaximize(win)}
+                    />
+                  )}
+
+                  {/* Zoo XR — about.txt */}
+                  {win.kind === "about" && win.projectName === "Zoo XR" && (
+                    <div style={{ height: "100%", overflowY: "auto", padding: "14px 18px", fontFamily: "var(--font-body-mono)", fontSize: 11, letterSpacing: "-0.03em", color: "#222" }}>
+                      <h2 style={{ fontSize: 14, fontWeight: "bold", marginBottom: 3 }}>Zoo XR</h2>
+                      <div style={{ fontSize: 10, color: "#888", marginBottom: 10, fontStyle: "italic" }}>Cross-Platform AR Builder to VR Experience</div>
+                      <p style={{ lineHeight: 1.7, marginBottom: 14, color: "#333" }}>
+                        An end-to-end XR application featuring an augmented reality mobile builder interface for spatial design,
+                        which seamlessly exports to a virtual reality exploration environment for the Meta Quest.
+                        The project focuses on cross-platform data serialization, spatial constraints validation, and interactive physics.
+                      </p>
+                      <div style={{ fontSize: 9, fontWeight: "bold", letterSpacing: "0.08em", color: "#888", marginBottom: 6, textTransform: "uppercase" }}>Core Systems</div>
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontWeight: "bold", fontSize: 11, marginBottom: 4, color: "#111" }}>Cross-Platform Serialization Pipeline</div>
+                        <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Designed a data pipeline to export the entire AR scene layout — objects, transforms, and enclosure metadata — into a JSON format, enabling dynamic deserialization and full scene reconstruction in the VR environment.</p>
+                      </div>
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontWeight: "bold", fontSize: 11, marginBottom: 4, color: "#111" }}>Rule-Based Validation System (AR)</div>
+                        <p style={{ lineHeight: 1.7, color: "#444", marginBottom: 8 }}>Constraint-checking architecture to validate scene logic before VR export:</p>
+                        <ul style={{ margin: 0, paddingLeft: 16, color: "#444", lineHeight: 1.8 }}>
+                          <li>Calculates spatial relationships to ensure all enclosures are fully fenced and contain animals</li>
+                          <li>Validates pathfinding connectivity leading to each enclosure and correct placement of food bins</li>
+                        </ul>
+                        <div style={{ marginTop: 10, background: "#eee", border: "1px dashed #bbb", borderRadius: 3, padding: "18px 12px", textAlign: "center", color: "#999", fontSize: 9, letterSpacing: "0.06em" }}>[ CONSTRAINT VALIDATION SCREENSHOTS ]</div>
+                      </div>
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontWeight: "bold", fontSize: 11, marginBottom: 4, color: "#111" }}>Spatial Anchoring &amp; Scaling (AR)</div>
+                        <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Implemented individual object manipulation (translate / rotate / scale) alongside a global scaling system with a 1-meter physical reference, ensuring accurate real-world size mapping when transitioning from mobile AR to the VR headset.</p>
+                      </div>
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontWeight: "bold", fontSize: 11, marginBottom: 4, color: "#111" }}>Behavioral State Machines (VR)</div>
+                        <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Programmed Finite State Machines for animal AI. Animals dynamically transition between states — fleeing out of fear, eating, following the player — based on proximity and player interactions.</p>
+                      </div>
+                      <div style={{ marginBottom: 14 }}>
+                        <div style={{ fontWeight: "bold", fontSize: 11, marginBottom: 4, color: "#111" }}>Physics-Based Interactions (VR)</div>
+                        <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Implemented hands-on VR mechanics including physics-driven enclosure doors and visual petting interactions that update animals&apos; internal emotional states.</p>
+                      </div>
+                      <div style={{ borderTop: "1px solid #ddd", paddingTop: 10, fontSize: 10, color: "#666", lineHeight: 1.8 }}>
+                        <div><strong>Platform:</strong> iOS (AR) · Meta Quest 3 (VR)</div>
+                        <div><strong>Tech Stack:</strong> Unity 3D | C# | AR Foundation | XR Interaction Toolkit (XRI) | Meta Quest SDK</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Creatures in TV — about.txt */}
+                  {win.kind === "about" && win.projectName === "Creatures in TV" && (
+                    <div style={{ height: "100%", overflowY: "auto", padding: "14px 18px", fontFamily: "var(--font-body-mono)", fontSize: 11, letterSpacing: "-0.03em", color: "#222" }}>
+                      <h2 style={{ fontSize: 14, fontWeight: "bold", marginBottom: 3 }}>Creatures in TV</h2>
+                      <div style={{ fontSize: 10, color: "#888", marginBottom: 10, fontStyle: "italic" }}>Multimodal Text-to-Animation Pipeline</div>
+                      <p style={{ lineHeight: 1.7, marginBottom: 14, color: "#333" }}>
+                        A full-stack, cloud-deployed AI application that transforms static 2D photos into dynamic animated scenes
+                        by bringing imaginative creatures into personal photos. By orchestrating generative AI models with advanced
+                        computer vision segmentation, the pipeline allows users to hatch custom creatures and direct their
+                        interactions within a spatially-aware environment of their choice.
+                      </p>
+                      <div style={{ fontSize: 9, fontWeight: "bold", letterSpacing: "0.08em", color: "#888", marginBottom: 6, textTransform: "uppercase" }}>Core Systems</div>
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontWeight: "bold", fontSize: 11, marginBottom: 4, color: "#111" }}>Generative Asset Pipeline</div>
+                        <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Integrated the Gemini API to dynamically generate creature concepts and corresponding multi-action sprite sheets from user text prompts.</p>
+                      </div>
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontWeight: "bold", fontSize: 11, marginBottom: 4, color: "#111" }}>Computer Vision &amp; Scene Processing</div>
+                        <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Engineered a backend Python pipeline utilizing SAM2 (Segment Anything Model 2) to process user-uploaded photos, automatically generating segmented masks and depth maps for spatial awareness.</p>
+                      </div>
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontWeight: "bold", fontSize: 11, marginBottom: 4, color: "#111" }}>Algorithmic Trajectory &amp; Depth Logic</div>
+                        <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Developed an auto-pathing recommendation algorithm that analyzes scene masks to suggest realistic traversal routes. Implemented depth-sorting logic to ensure creatures seamlessly occlude or hide behind real-world objects in the photo.</p>
+                      </div>
+                      <div style={{ marginBottom: 14 }}>
+                        <div style={{ fontWeight: "bold", fontSize: 11, marginBottom: 4, color: "#111" }}>Cloud Infrastructure &amp; Deployment</div>
+                        <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Containerized the heavy machine-learning backend and web frontend, successfully deploying the end-to-end application on AWS ECS (Elastic Container Service) for public web access.</p>
                       </div>
 
+                      {/* Future Research — Mac OS "Note" box style */}
+                      <div style={{
+                        margin: "0 0 14px 0",
+                        background: "#fffbec",
+                        border: "1px solid #d4a820",
+                        borderLeft: "3px solid #d4a820",
+                        borderRadius: 2,
+                        padding: "9px 12px",
+                      }}>
+                        <div style={{ fontFamily: "var(--font-display)", fontSize: "0.7rem", fontWeight: 700, color: "#a07800", marginBottom: 5, letterSpacing: "0.04em" }}>
+                          ✦ FUTURE RESEARCH
+                        </div>
+                        <p style={{ lineHeight: 1.7, color: "#6b5200", margin: 0, fontStyle: "italic" }}>
+                          While current iterations rely on GenAI for sprite rendering, ongoing research aims to decouple animation
+                          from pure image generation. The next phase will explore overlaying programmatic procedural animations
+                          and emotion-driven state machines onto simplified base meshes, prioritizing expressive, fine-grained
+                          control over computational brute force.
+                        </p>
+                      </div>
+
+                      <div style={{ borderTop: "1px solid #ddd", paddingTop: 10, fontSize: 10, color: "#666", lineHeight: 1.8 }}>
+                        <div><strong>Tech Stack:</strong> Python | Gemini API | SAM2 (Computer Vision) | AWS ECS | Web Frontend (JS/HTML) | Generative AI</div>
+                      </div>
+                    </div>
+                  )}
+                </Window>
+              </div>
+            ))}
+
+            {/* Print preview window */}
+            {printerOpen && (
+              <div onMouseDown={() => setActiveWindow("printer")} style={{ display: "contents" }}>
+                <Window
+                  title="resume.pdf"
+                  active={activeWindow === "printer"}
+                  draggable
+                  resizable={!printerCollapsed}
+                  position={printerPos}
+                  onPositionChange={setPrinterPos}
+                  width={printerSize.width}
+                  height={printerCollapsed ? TITLEBAR_H : printerSize.height}
+                  onResize={(size) => setPrinterSize(size)}
+                  titleBar={
+                    <MacTitleBar
+                      title="resume.pdf"
+                      onPositionChange={setPrinterPos}
+                      onClose={() => { setPrinterOpen(false); setActiveWindow(null); setPrinterCollapsed(false); setPrinterMaximized(false); }}
+                      onCollapse={() => setPrinterCollapsed(c => !c)}
+                      onZoom={togglePrinterMaximize}
+                    />
+                  }
+                >
+                  <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+                    {/* Experience content */}
+                    <div style={{ flex: 1, overflowY: "auto", padding: "14px 18px", fontFamily: "var(--font-body-mono)", fontSize: 13, color: "#111", letterSpacing: "-0.03em" }}>
+                      <div style={{ fontSize: 11, fontWeight: "bold", letterSpacing: "0.06em", color: "#888", marginBottom: 10 }}>EXPERIENCE</div>
                       <ExpCard
                         org="Columbia University"
                         role="Research Assistant"
@@ -899,259 +1174,33 @@ export default function Home() {
                           "Led model integration into web platform; 90%+ positive user feedback on accessibility and performance",
                         ]}
                       />
-
                     </div>
-                  </div>
-                </Window>
-              </div>
-            )}
-
-            {/* Projects — single-pane file browser */}
-            {documentsOpen && (
-              <div onMouseDown={() => setActiveWindow("documents")} style={{ display: "contents" }}>
-                <Window
-                  title="Projects"
-                  active={activeWindow === "documents"}
-                  draggable
-                  resizable={!documentsCollapsed}
-                  position={documentsPos}
-                  onPositionChange={setDocumentsPos}
-                  width={documentsSize.width}
-                  height={documentsCollapsed ? TITLEBAR_H : documentsSize.height}
-                  onResize={(size) => setDocumentsSize(size)}
-                  titleBar={
-                    <MacTitleBar
-                      title="Projects"
-                      onPositionChange={setDocumentsPos}
-                      onClose={() => { setDocumentsOpen(false); setActiveWindow(null); setDocumentsCollapsed(false); setDocumentsMaximized(false); }}
-                      onCollapse={() => setDocumentsCollapsed(c => !c)}
-                      onZoom={toggleMaximize}
-                    />
-                  }
-                >
-                  {/* Projects window always shows the root folder list */}
-                  <div style={{ flex: 1, overflowY: "auto", padding: 12, display: "flex", flexWrap: "wrap", gap: 8, alignItems: "flex-start" }}>
-                    <IconButton
-                      icon={<FolderIcon />}
-                      label={PROJECT.title} labelPosition="bottom" size="lg"
-                      style={{ background: "transparent", border: "none", boxShadow: "none" }}
-                      onDoubleClick={(e) => { e.stopPropagation(); openProject("My Project"); }}
-                    />
-                    <IconButton
-                      icon={<FolderIcon />}
-                      label="VR Escape Room" labelPosition="bottom" size="lg"
-                      style={{ background: "transparent", border: "none", boxShadow: "none" }}
-                      onDoubleClick={(e) => { e.stopPropagation(); openProject("VR Escape Room"); }}
-                    />
-                  </div>
-                </Window>
-              </div>
-            )}
-
-            {/* Project sub-windows — Mac OS 9 style: each project opens its own window */}
-            {subWins.map(win => (
-              <div key={win.id} onMouseDown={() => setActiveWindow(win.id)} style={{ display: "contents" }}>
-                <Window
-                  title={win.file ?? win.projectName}
-                  active={activeWindow === win.id}
-                  draggable
-                  resizable={!win.collapsed}
-                  position={win.pos}
-                  onPositionChange={(p) => updateSubWin(win.id, { pos: p })}
-                  width={win.size.width}
-                  height={win.collapsed ? TITLEBAR_H : win.size.height}
-                  onResize={(size) => updateSubWin(win.id, { size })}
-                  titleBar={
-                    <MacTitleBar
-                      title={win.file ?? win.projectName}
-                      onPositionChange={(p) => updateSubWin(win.id, { pos: p })}
-                      onClose={() => closeSubWin(win.id, win.projectName)}
-                      onCollapse={() => updateSubWin(win.id, { collapsed: !win.collapsed })}
-                      onZoom={() => toggleSubWinMaximize(win)}
-                    />
-                  }
-                >
-                  {/* VR Escape Room — folder view */}
-                  {win.projectName === "VR Escape Room" && win.file === null && (
-                    <div style={{ flex: 1, overflowY: "auto", padding: 12, display: "flex", flexWrap: "wrap", gap: 8, alignItems: "flex-start" }}>
-                      <IconButton
-                        icon={<img src="/readme-icon.png" width={40} height={40} alt="" draggable={false} style={{ opacity: win.selectedItem === "vr-about" ? 0.6 : 1 }} />}
-                        label="about.txt" labelPosition="bottom" size="lg"
-                        style={{ background: "transparent", border: "none", boxShadow: "none" }}
-                        onClick={(e) => { e.stopPropagation(); updateSubWin(win.id, { selectedItem: "vr-about" }); }}
-                        onDoubleClick={(e) => { e.stopPropagation(); openSubWinFile(win, "about.txt"); }}
-                      />
-                      <IconButton
-                        icon={<VideoIcon selected={win.selectedItem === "vr-video"} />}
-                        label="demo.mp4" labelPosition="bottom" size="lg"
-                        style={{ background: "transparent", border: "none", boxShadow: "none" }}
-                        onClick={(e) => { e.stopPropagation(); updateSubWin(win.id, { selectedItem: "vr-video" }); }}
-                        onDoubleClick={(e) => { e.stopPropagation(); openSubWinFile(win, "demo.mp4"); }}
-                      />
-                    </div>
-                  )}
-
-                  {/* VR Escape Room — about.txt */}
-                  {win.projectName === "VR Escape Room" && win.file === "about.txt" && (
-                    <div style={{ height: "100%", overflowY: "auto" }}>
-                      <div style={{ padding: "4px 8px", borderBottom: "1px solid #ccc", background: "#f0f0f0", flexShrink: 0 }}>
-                        <button onClick={() => closeSubWinFile(win)} style={{ border: "1px solid #aaa", borderRadius: 2, background: "#e0e0e0", padding: "1px 8px", cursor: "pointer", fontSize: 10, fontFamily: "var(--font-system)" }}>← Back</button>
-                      </div>
-                      <div style={{ padding: "12px 16px", fontFamily: "var(--font-system)", fontSize: 11 }}>
-                        <h2 style={{ fontSize: 13, fontWeight: "bold", marginBottom: 6 }}>VR Escape Room</h2>
-                        <p style={{ lineHeight: 1.6, marginBottom: 10, color: "#333" }}>A virtual reality escape room experience built with [technology stack]. Players solve puzzles and navigate immersive environments.</p>
-                        <div style={{ background: "#eee", border: "1px dashed #aaa", borderRadius: 3, padding: "20px", textAlign: "center", color: "#888", fontSize: 10, marginBottom: 10 }}>[ images go here ]</div>
-                        <div style={{ fontSize: 10, color: "#666", lineHeight: 1.8 }}>
-                          <strong>Tech:</strong> [engine / frameworks]<br />
-                          <strong>Role:</strong> [your role]<br />
-                          <strong>Year:</strong> [year]
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* VR Escape Room — demo.mp4 QuickTime player */}
-                  {win.projectName === "VR Escape Room" && win.file === "demo.mp4" && (
-                    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-                      <div style={{ padding: "4px 8px", borderBottom: "1px solid #ccc", background: "#f0f0f0", flexShrink: 0 }}>
-                        <button onClick={() => closeSubWinFile(win)} style={{ border: "1px solid #aaa", borderRadius: 2, background: "#e0e0e0", padding: "1px 8px", cursor: "pointer", fontSize: 10, fontFamily: "var(--font-system)" }}>← Back</button>
-                      </div>
-                      <div style={{ flex: 1, background: "#0d0d0d", position: "relative", minHeight: 0, overflow: "hidden" }}>
-                        {vrStarted && <div id="yt-player-root"><div ref={ytDivRef} /></div>}
-                        {vrStarted && <div style={{ position: "absolute", inset: 0, zIndex: 1, cursor: "default" }} onClick={handlePlayPause} />}
-                        {!vrStarted && (
-                          <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 3px), #0d0d0d", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10 }}>
-                            <div onClick={handleFirstPlay} style={{ width: 52, height: 52, borderRadius: "50%", border: "2px solid #777", background: "radial-gradient(circle at 38% 32%, #5a5a5a, #1a1a1a)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#ccc", fontSize: 20, paddingLeft: 4, boxShadow: "0 0 14px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.12)" }}>▶</div>
-                            <span style={{ color: "#444", fontSize: 9, fontFamily: "var(--font-system)", letterSpacing: "0.14em" }}>CLICK TO PLAY</span>
-                          </div>
-                        )}
-                      </div>
-                      <div style={{ background: "linear-gradient(180deg, #c8c8c8 0%, #a0a0a0 50%, #888 100%)", borderTop: "1px solid #555", padding: "4px 8px", display: "flex", alignItems: "center", gap: 6, flexShrink: 0, boxShadow: "inset 0 1px 0 rgba(255,255,255,0.4)" }}>
-                        <button onClick={handlePlayPause} style={{ width: 22, height: 22, borderRadius: 3, border: "1px solid #555", background: "linear-gradient(180deg, #e0e0e0 0%, #b8b8b8 100%)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 10, color: "#222", flexShrink: 0, boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6), 0 1px 1px rgba(0,0,0,0.3)" }}>{vrVideoPlaying ? "■" : "▶"}</button>
-                        <div ref={seekBarRef} onMouseDown={handleSeekBarMouseDown} style={{ flex: 1, height: 10, position: "relative", background: "linear-gradient(180deg, #3a3a3a 0%, #555 100%)", borderRadius: 4, border: "1px solid #2a2a2a", boxShadow: "inset 0 1px 2px rgba(0,0,0,0.6)", cursor: vrStarted ? "pointer" : "default", userSelect: "none", overflow: "visible" }}>
-                          <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${videoProgress * 100}%`, background: "linear-gradient(90deg, #6aaee0, #4888c8)", borderRadius: 4, overflow: "visible" }}>
-                            {vrStarted && <div style={{ position: "absolute", right: -5, top: "50%", transform: "translateY(-50%)", width: 10, height: 10, borderRadius: "50%", background: "linear-gradient(180deg, #f0f0f0 0%, #c0c0c0 100%)", border: "1px solid #444", boxShadow: "0 1px 3px rgba(0,0,0,0.5)", pointerEvents: "none" }} />}
-                          </div>
-                        </div>
-                        <span style={{ fontSize: 9, fontWeight: "bold", fontFamily: "var(--font-system)", color: "#444", letterSpacing: "0.04em", flexShrink: 0 }}>QT</span>
-                        <button onClick={() => toggleSubWinMaximize(win)} title={win.maximized ? "Restore" : "Maximize"} style={{ width: 22, height: 22, borderRadius: 3, border: "1px solid #555", background: "linear-gradient(180deg, #e0e0e0 0%, #b8b8b8 100%)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 11, color: "#222", flexShrink: 0, boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6), 0 1px 1px rgba(0,0,0,0.3)" }}>{win.maximized ? "⊟" : "⊞"}</button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* My Project */}
-                  {win.projectName === "My Project" && (
-                    <div style={{ height: "100%", overflowY: "auto" }}>
-                      <div style={{ padding: "12px 16px", fontFamily: "var(--font-system)" }}>
-                        <h2 style={{ fontSize: 13, fontWeight: "bold", marginBottom: 6 }}>{PROJECT.title}</h2>
-                        <p style={{ fontSize: 11, lineHeight: 1.6, marginBottom: 10, color: "#333" }}>{PROJECT.description}</p>
-                        <div style={{ marginBottom: 10 }}>
-                          <strong style={{ fontSize: 10, display: "block", marginBottom: 4 }}>Technologies</strong>
-                          <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-                            {PROJECT.tech.map((t) => (
-                              <span key={t} style={{ fontSize: 10, border: "1px solid #999", padding: "1px 5px", background: "#eee" }}>{t}</span>
-                            ))}
-                          </div>
-                        </div>
-                        <a href={PROJECT.link} target="_blank" rel="noopener noreferrer" style={{ fontSize: 10, color: "#0000CC" }}>View on GitHub →</a>
-                      </div>
-                    </div>
-                  )}
-                </Window>
-              </div>
-            ))}
-
-            {/* Print preview window */}
-            {printerOpen && (
-              <div onMouseDown={() => setActiveWindow("printer")} style={{ display: "contents" }}>
-                <Window
-                  title="Print Preview — Resume.pdf"
-                  active={activeWindow === "printer"}
-                  draggable
-                  resizable={!printerCollapsed}
-                  position={printerPos}
-                  onPositionChange={setPrinterPos}
-                  width={printerSize.width}
-                  height={printerCollapsed ? TITLEBAR_H : printerSize.height}
-                  onResize={(size) => setPrinterSize(size)}
-                  titleBar={
-                    <MacTitleBar
-                      title="Print Preview — Resume.pdf"
-                      onPositionChange={setPrinterPos}
-                      onClose={() => { setPrinterOpen(false); setActiveWindow(null); setPrinterCollapsed(false); setPrinterMaximized(false); }}
-                      onCollapse={() => setPrinterCollapsed(c => !c)}
-                      onZoom={togglePrinterMaximize}
-                    />
-                  }
-                >
-                  <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-                    {/* Frutiger Aero toolbar */}
+                    {/* Bottom bar with download */}
                     <div style={{
-                      background: "linear-gradient(180deg, #a8d8f0 0%, #5ba3dc 45%, #2e75c8 100%)",
-                      borderBottom: "1px solid #1a5a9e",
-                      padding: "5px 10px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 7,
-                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.65), 0 1px 2px rgba(0,0,60,0.2)",
-                      flexShrink: 0,
-                    }}>
-                      <img src="/printer.png" width={16} height={16} alt="" style={{ imageRendering: "pixelated" }} />
-                      <span style={{
-                        color: "white",
-                        fontSize: 11,
-                        fontWeight: "bold",
-                        fontFamily: "var(--font-system)",
-                        textShadow: "0 1px 2px rgba(0,0,60,0.5)",
-                        letterSpacing: "0.01em",
-                      }}>
-                        Resume.pdf — Print Preview
-                      </span>
-                    </div>
-
-                    {/* PDF viewer */}
-                    <div style={{ flex: 1, overflow: "hidden", background: "#6b7c8a", minHeight: 0 }}>
-                      <iframe
-                        src="/Erica (Kela) Liu Resume.pdf#toolbar=0&navpanes=0&scrollbar=0"
-                        style={{ width: "100%", height: "100%", border: "none", display: "block" }}
-                        title="Resume PDF Preview"
-                      />
-                    </div>
-
-                    {/* Frutiger Aero bottom bar */}
-                    <div style={{
-                      background: "linear-gradient(180deg, #dff0fa 0%, #b8d8f0 100%)",
-                      borderTop: "1px solid #8ab8d8",
-                      padding: "6px 10px",
+                      borderTop: "1px solid #bbb",
+                      background: "#e8e8e8",
+                      padding: "6px 12px",
                       display: "flex",
                       justifyContent: "flex-end",
                       alignItems: "center",
                       flexShrink: 0,
-                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.8)",
                     }}>
                       <a
                         href="/Erica (Kela) Liu Resume.pdf"
                         download="Erica (Kela) Liu Resume.pdf"
                         style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: 5,
-                          padding: "4px 16px",
-                          borderRadius: 12,
-                          background: "linear-gradient(180deg, #7cc4f8 0%, #3a90e8 48%, #1a68cc 100%)",
-                          boxShadow: "0 2px 4px rgba(0,0,80,0.3), inset 0 1px 0 rgba(255,255,255,0.55)",
-                          border: "1px solid #1050a8",
-                          color: "white",
-                          fontSize: 11,
-                          fontWeight: "bold",
-                          fontFamily: "var(--font-system)",
+                          display: "inline-flex", alignItems: "center", gap: 5,
+                          padding: "3px 14px", borderRadius: 3,
+                          background: "linear-gradient(180deg, #f0f0f0 0%, #d8d8d8 100%)",
+                          border: "1px solid #999",
+                          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.8), 0 1px 1px rgba(0,0,0,0.15)",
+                          color: "#222", fontSize: 11,
+                          fontFamily: "var(--font-body-mono)",
                           textDecoration: "none",
-                          textShadow: "0 1px 1px rgba(0,0,60,0.45)",
-                          cursor: "pointer",
-                          letterSpacing: "0.01em",
+                          letterSpacing: "0.02em",
                         }}
                       >
-                        ↓ Download
+                        ↓ Download PDF
                       </a>
                     </div>
                   </div>

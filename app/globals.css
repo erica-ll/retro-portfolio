@@ -36,12 +36,18 @@ body {
   min-height: 0 !important;
 }
 
+/* Pixel font for folder/file icon labels rendered by the library's IconButton */
+.IconButton-module_label {
+  font-family: var(--font-display) !important;
+  font-size: 11px !important;
+}
+
 /* YouTube IFrame API player — sizes the container and generated iframe to fill the video area */
-#yt-player-root {
+.yt-player-wrapper {
   position: absolute;
   inset: 0;
 }
-#yt-player-root iframe {
+.yt-player-wrapper iframe {
   width: 100% !important;
   height: 100% !important;
   border: none !important;
