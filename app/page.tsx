@@ -8,6 +8,19 @@ import {
   IconButton,
 } from "@liiift-studio/mac-os9-ui";
 
+interface YTPlayer {
+  destroy(): void;
+  getCurrentTime(): number;
+  getDuration(): number;
+  seekTo(seconds: number, allowSeekAhead: boolean): void;
+  pauseVideo(): void;
+  playVideo(): void;
+}
+type YTWindow = Window & {
+  YT?: { Player: new (el: HTMLElement, opts: object) => YTPlayer };
+  onYouTubeIframeAPIReady?: () => void;
+};
+
 // ─── Monitor frame geometry ───────────────────────────────────────────────────
 // desk-full-clean.png is 1718 × 1306.  Change MONITOR_W to resize.
 const MONITOR_W = 1200;
@@ -31,23 +44,37 @@ const MAX_H = SCR_H - 55;   // ~480 (accounts for ~45 px menu bar + small margin
 // Collapsed (windowshade) height: title bar min-height 22px + 2px window border
 const TITLEBAR_H = 24;
 
+function fmtTime() {
+  const d = new Date();
+  let h = d.getHours();
+  const m = d.getMinutes().toString().padStart(2, "0");
+  const ampm = h >= 12 ? "PM" : "AM";
+  h = h % 12 || 12;
+  return `${h}:${m} ${ampm}`;
+}
+
 function Clock() {
-  const [time, setTime] = useState("");
+  const [time, setTime] = useState(fmtTime);
   useEffect(() => {
-    const fmt = () => {
-      const d = new Date();
-      let h = d.getHours();
-      const m = d.getMinutes().toString().padStart(2, "0");
-      const ampm = h >= 12 ? "PM" : "AM";
-      h = h % 12 || 12;
-      return `${h}:${m} ${ampm}`;
-    };
-    setTime(fmt());
-    const id = setInterval(() => setTime(fmt()), 1000);
+    const id = setInterval(() => setTime(fmtTime()), 1000);
     return () => clearInterval(id);
   }, []);
   return (
     <span style={{ fontSize: 12, fontFamily: "var(--font-body-mono)" }}>{time}</span>
+  );
+}
+
+function StripeSVG() {
+  return (
+    <svg width="132" height="13" viewBox="0 0 132 13" fill="none" preserveAspectRatio="none"
+      xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", display: "block" }}>
+      <rect width="130.517" height="13" fill="#DDDDDD" />
+      <rect width="1" height="13" fill="#EEEEEE" />
+      <rect x="130" width="1" height="13" fill="#C5C5C5" />
+      {([1, 3, 5, 7, 9, 11] as number[]).map(y => (
+        <rect key={y} y={y} width="131.268" height="1" fill="#999999" />
+      ))}
+    </svg>
   );
 }
 
@@ -105,18 +132,6 @@ function MacTitleBar({
     flexShrink: 0,
     boxShadow: "inset -1px -1px 0 rgba(255,255,255,0.7), inset 1px 1px 0 rgba(0,0,0,0.25)",
   };
-
-  const StripeSVG = () => (
-    <svg width="132" height="13" viewBox="0 0 132 13" fill="none" preserveAspectRatio="none"
-      xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", display: "block" }}>
-      <rect width="130.517" height="13" fill="#DDDDDD" />
-      <rect width="1" height="13" fill="#EEEEEE" />
-      <rect x="130" width="1" height="13" fill="#C5C5C5" />
-      {([1, 3, 5, 7, 9, 11] as number[]).map(y => (
-        <rect key={y} y={y} width="131.268" height="1" fill="#999999" />
-      ))}
-    </svg>
-  );
 
   return (
     <div
@@ -216,7 +231,7 @@ function VideoPlayer({ videoId, maximized, onToggleMaximize }: {
   const [playing, setPlaying] = useState(false);
   const [started, setStarted] = useState(false);
   const [progress, setProgress] = useState(0);
-  const playerRef = useRef<any>(null);
+  const playerRef = useRef<YTPlayer | null>(null);
   const divRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isDraggingRef = useRef(false);
@@ -235,7 +250,7 @@ function VideoPlayer({ videoId, maximized, onToggleMaximize }: {
     if (!started) return;
     const tryCreate = () => {
       if (playerRef.current || !divRef.current) return;
-      const w = window as any;
+      const w = window as YTWindow;
       if (!w.YT?.Player) return;
       playerRef.current = new w.YT.Player(divRef.current, {
         width: "100%", height: "100%",
@@ -261,7 +276,7 @@ function VideoPlayer({ videoId, maximized, onToggleMaximize }: {
         },
       });
     };
-    const w = window as any;
+    const w = window as YTWindow;
     if (w.YT?.Player) tryCreate();
     else { const prev = w.onYouTubeIframeAPIReady; w.onYouTubeIframeAPIReady = () => { prev?.(); tryCreate(); }; }
   }, [started, videoId]);
@@ -531,12 +546,12 @@ export default function Home() {
   useEffect(() => {
     const t = setTimeout(triggerBoot, 2000);
     return () => clearTimeout(t);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   // Load YouTube IFrame API script once on mount
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if ((window as any).YT?.Player) return;
+    if ((window as YTWindow).YT?.Player) return;
     if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
       const s = document.createElement("script");
       s.src = "https://www.youtube.com/iframe_api";
@@ -974,7 +989,7 @@ export default function Home() {
                       <div style={{ fontSize: 9, fontWeight: "bold", letterSpacing: "0.08em", color: "#888", marginBottom: 6, textTransform: "uppercase" }}>Core Systems</div>
                       <div style={{ marginBottom: 12 }}>
                         <div style={{ fontWeight: "bold", fontSize: 11, marginBottom: 4, color: "#111" }}>Dynamic Asset Swapping (Time Barrier)</div>
-                        <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Engineered a spatial trigger system that updates 3D meshes and materials in real-time. When grabbed objects cross a localized "time barrier," their visual states transition between future and retro aesthetics without interrupting the XR grab interaction.</p>
+                        <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Engineered a spatial trigger system that updates 3D meshes and materials in real-time. When grabbed objects cross a localized &ldquo;time barrier,&rdquo; their visual states transition between future and retro aesthetics without interrupting the XR grab interaction.</p>
                       </div>
                       <div style={{ marginBottom: 12 }}>
                         <div style={{ fontWeight: "bold", fontSize: 11, marginBottom: 4, color: "#111" }}>Real-Time Spatial Minimap</div>
