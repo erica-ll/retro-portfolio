@@ -30,6 +30,15 @@ body {
   min-height: 0 !important;
 }
 
+/* Remove the library's inset margin/padding/border from the window content shell
+   so our own content divs fill edge-to-edge. */
+.Window-module_content {
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: transparent !important;
+  border: none !important;
+}
+
 /* Pixel font for folder/file icon labels rendered by the library's IconButton */
 .IconButton-module_label {
   font-family: var(--font-display) !important;
