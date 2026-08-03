@@ -400,21 +400,43 @@ function ExpCard({ org, role, period, project, bullets }: {
 }) {
   return (
     <div style={{
-      border: "1px solid #bbb",
-      borderRadius: 4,
-      padding: "10px 12px",
-      background: "#fafafa",
-      marginBottom: 8,
+      border: "2px solid #111",
+      borderRadius: 3,
+      padding: "9px 12px 10px",
+      background: "linear-gradient(150deg, #e8e8e8 0%, #d0d0d0 100%)",
+      boxShadow: "inset 2px 2px 0 #ffffff, inset -2px -2px 0 #888888",
+      marginBottom: 10,
     }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 2 }}>
-        <span style={{ fontWeight: "bold", fontSize: 13 }}>{org}</span>
-        <span style={{ fontSize: 11, color: "#666" }}>{period}</span>
+        <span style={{ fontWeight: "bold", fontSize: 13, color: "#111" }}>{org}</span>
+        <span style={{
+          fontSize: 10,
+          color: "#fff",
+          background: "#555",
+          border: "1px solid #222",
+          boxShadow: "inset 1px 1px 0 #999, inset -1px -1px 0 #333",
+          padding: "1px 6px",
+          borderRadius: 2,
+          fontFamily: "var(--font-body-mono)",
+        }}>{period}</span>
       </div>
-      <div style={{ fontSize: 12, color: "#555", marginBottom: project ? 2 : 6 }}>{role}</div>
-      {project && <div style={{ fontSize: 11, fontStyle: "italic", color: "#444", marginBottom: 5 }}>{project}</div>}
+      <div style={{ fontSize: 12, color: "#333", fontStyle: "italic", marginBottom: project ? 2 : 5 }}>{role}</div>
+      {project && (
+        <div style={{
+          fontSize: 11,
+          color: "#1a3a6e",
+          background: "linear-gradient(90deg, #b8c8e8 0%, #a8b8d8 100%)",
+          border: "1px solid #4466aa",
+          boxShadow: "inset 1px 1px 0 #d8e4f8, inset -1px -1px 0 #6688cc",
+          padding: "1px 6px",
+          borderRadius: 2,
+          marginBottom: 5,
+          fontFamily: "var(--font-body-mono)",
+        }}>{project}</div>
+      )}
       <ul style={{ margin: 0, paddingLeft: 16 }}>
         {bullets.map((b, i) => (
-          <li key={i} style={{ fontSize: 12, lineHeight: 1.6, color: "#222", marginBottom: 2 }}>{b}</li>
+          <li key={i} style={{ fontSize: 12, lineHeight: 1.5, color: "#222", marginBottom: 2 }}>{b}</li>
         ))}
       </ul>
     </div>
@@ -1143,8 +1165,8 @@ export default function Home() {
                     />
                   }
                 >
-                  <div style={{ height: "100%", overflowY: "auto", padding: "14px 18px", fontFamily: "var(--font-body-mono)", fontSize: 13, color: "#111", letterSpacing: "-0.03em" }}>
-                    <div style={{ fontSize: 11, fontWeight: "bold", letterSpacing: "0.06em", color: "#888", marginBottom: 10 }}>EXPERIENCE</div>
+                  <div style={{ height: "100%", overflowY: "auto", padding: "12px 14px", fontFamily: "var(--font-body-mono)", fontSize: 13, color: "#111", letterSpacing: "-0.03em", background: "linear-gradient(180deg, #d4d4d4 0%, #c8c8c8 100%)" }}>
+                    <div style={{ fontSize: 10, fontWeight: "bold", letterSpacing: "0.1em", color: "#fff", background: "#444", border: "2px solid #111", boxShadow: "inset 1px 1px 0 #888, inset -1px -1px 0 #222", padding: "2px 8px", marginBottom: 10, display: "inline-block" }}>EXPERIENCE</div>
                     <ExpCard
                       org="Columbia University"
                       role="Research Assistant"
@@ -1188,7 +1210,7 @@ export default function Home() {
                       ]}
                     />
                     {/* Download button — at end of scrollable content */}
-                    <div style={{ display: "flex", justifyContent: "center", padding: "18px 0 6px" }}>
+                    <div style={{ display: "flex", justifyContent: "center", padding: "18px 0 8px" }}>
                       <a
                         href="/Erica (Kela) Liu Resume.pdf"
                         download="Erica (Kela) Liu Resume.pdf"
@@ -1198,7 +1220,7 @@ export default function Home() {
                           src="/download-btn.png"
                           alt="Download PDF"
                           draggable={false}
-                          style={{ width: 168, height: "auto", imageRendering: "pixelated", display: "block" }}
+                          style={{ width: 168, height: "auto", imageRendering: "pixelated", display: "block", filter: "drop-shadow(2px 3px 0px rgba(0,0,0,0.55))" }}
                         />
                       </a>
                     </div>
