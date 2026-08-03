@@ -1143,79 +1143,63 @@ export default function Home() {
                     />
                   }
                 >
-                  <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-                    {/* Experience content */}
-                    <div style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "14px 18px", fontFamily: "var(--font-body-mono)", fontSize: 13, color: "#111", letterSpacing: "-0.03em" }}>
-                      <div style={{ fontSize: 11, fontWeight: "bold", letterSpacing: "0.06em", color: "#888", marginBottom: 10 }}>EXPERIENCE</div>
-                      <ExpCard
-                        org="Columbia University"
-                        role="Research Assistant"
-                        period="Jan 2026 – Present"
-                        project="Multimodal Text-to-Animation Pipeline"
-                        bullets={[
-                          "Animating static images into 2.5D character motion via depth maps, segmentation labels, and natural language prompts",
-                          "Using image-to-video diffusion models for motion priors + skeletal rig extraction to isolate movement",
-                          "Reintegrating rigs back to the source image to preserve background and character fidelity",
-                        ]}
-                      />
-                      <ExpCard
-                        org="Linx Robot"
-                        role="AI/ML Intern"
-                        period="Jun – Aug 2025"
-                        project="Generative AI Stereo Synthesis Pipeline"
-                        bullets={[
-                          "End-to-end data generation pipeline using DDPMs to accelerate stereo camera R&D",
-                          "Strict conditioning controls → geometry- and pixel-accurate right-eye generation with minimal hallucinations",
-                          "Optimized 2K stereo synthesis under compute constraints; presented trade-off analyses cross-functionally",
-                        ]}
-                      />
-                      <ExpCard
-                        org="UC Irvine"
-                        role="Research Assistant"
-                        period="Jul 2024 – Aug 2025"
-                        project="Biomedical Image Segmentation"
-                        bullets={[
-                          "Cascaded 3D U-Net in PyTorch: sequential liver → tumor → resection prediction stages",
-                          "Co-authored accepted paper at IEEE ISBI 2026 on automated 3D segmentation for liver surgical planning",
-                        ]}
-                      />
-                      <ExpCard
-                        org="UC Santa Barbara × FOIA Friend"
-                        role="Capstone Project"
-                        period="Sep 2024 – Apr 2025"
-                        project="LLM-Powered Document Evaluation (FARE)"
-                        bullets={[
-                          "AI text editor + rating system for FOIA requests using LLMs and Transformers — 82% rubric accuracy",
-                          "Led model integration into web platform; 90%+ positive user feedback on accessibility and performance",
-                        ]}
-                      />
-                    </div>
-                    {/* Bottom bar with download */}
-                    <div style={{
-                      borderTop: "1px solid #bbb",
-                      background: "#e8e8e8",
-                      padding: "6px 12px",
-                      display: "flex",
-                      justifyContent: "flex-end",
-                      alignItems: "center",
-                      flexShrink: 0,
-                    }}>
+                  <div style={{ height: "100%", overflowY: "auto", padding: "14px 18px", fontFamily: "var(--font-body-mono)", fontSize: 13, color: "#111", letterSpacing: "-0.03em" }}>
+                    <div style={{ fontSize: 11, fontWeight: "bold", letterSpacing: "0.06em", color: "#888", marginBottom: 10 }}>EXPERIENCE</div>
+                    <ExpCard
+                      org="Columbia University"
+                      role="Research Assistant"
+                      period="Jan 2026 – Present"
+                      project="Multimodal Text-to-Animation Pipeline"
+                      bullets={[
+                        "Animating static images into 2.5D character motion via depth maps, segmentation labels, and natural language prompts",
+                        "Using image-to-video diffusion models for motion priors + skeletal rig extraction to isolate movement",
+                        "Reintegrating rigs back to the source image to preserve background and character fidelity",
+                      ]}
+                    />
+                    <ExpCard
+                      org="Linx Robot"
+                      role="AI/ML Intern"
+                      period="Jun – Aug 2025"
+                      project="Generative AI Stereo Synthesis Pipeline"
+                      bullets={[
+                        "End-to-end data generation pipeline using DDPMs to accelerate stereo camera R&D",
+                        "Strict conditioning controls → geometry- and pixel-accurate right-eye generation with minimal hallucinations",
+                        "Optimized 2K stereo synthesis under compute constraints; presented trade-off analyses cross-functionally",
+                      ]}
+                    />
+                    <ExpCard
+                      org="UC Irvine"
+                      role="Research Assistant"
+                      period="Jul 2024 – Aug 2025"
+                      project="Biomedical Image Segmentation"
+                      bullets={[
+                        "Cascaded 3D U-Net in PyTorch: sequential liver → tumor → resection prediction stages",
+                        "Co-authored accepted paper at IEEE ISBI 2026 on automated 3D segmentation for liver surgical planning",
+                      ]}
+                    />
+                    <ExpCard
+                      org="UC Santa Barbara × FOIA Friend"
+                      role="Capstone Project"
+                      period="Sep 2024 – Apr 2025"
+                      project="LLM-Powered Document Evaluation (FARE)"
+                      bullets={[
+                        "AI text editor + rating system for FOIA requests using LLMs and Transformers — 82% rubric accuracy",
+                        "Led model integration into web platform; 90%+ positive user feedback on accessibility and performance",
+                      ]}
+                    />
+                    {/* Download button — at end of scrollable content */}
+                    <div style={{ display: "flex", justifyContent: "center", padding: "18px 0 6px" }}>
                       <a
                         href="/Erica (Kela) Liu Resume.pdf"
                         download="Erica (Kela) Liu Resume.pdf"
-                        style={{
-                          display: "inline-flex", alignItems: "center", gap: 5,
-                          padding: "3px 14px", borderRadius: 3,
-                          background: "linear-gradient(180deg, #f0f0f0 0%, #d8d8d8 100%)",
-                          border: "1px solid #999",
-                          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.8), 0 1px 1px rgba(0,0,0,0.15)",
-                          color: "#222", fontSize: 11,
-                          fontFamily: "var(--font-body-mono)",
-                          textDecoration: "none",
-                          letterSpacing: "0.02em",
-                        }}
+                        style={{ display: "block", cursor: "pointer" }}
                       >
-                        ↓ Download PDF
+                        <img
+                          src="/download-btn.png"
+                          alt="Download PDF"
+                          draggable={false}
+                          style={{ width: 168, height: "auto", imageRendering: "pixelated", display: "block" }}
+                        />
                       </a>
                     </div>
                   </div>
