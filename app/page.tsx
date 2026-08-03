@@ -500,9 +500,9 @@ export default function Home() {
   const [documentsOpen,        setDocumentsOpen]        = useState(false);
   const [documentsCollapsed,   setDocumentsCollapsed]   = useState(false);
   const [documentsMaximized,   setDocumentsMaximized]   = useState(false);
-  const [documentsPos,         setDocumentsPos]         = useState({ x: 40, y: 30 });
+  const [documentsPos,         setDocumentsPos]         = useState({ x: 40, y: 18 });
   const [documentsRestoreSize, setDocumentsRestoreSize] = useState({ width: 400, height: 280 });
-  const [documentsRestorePos,  setDocumentsRestorePos]  = useState({ x: 40, y: 30 });
+  const [documentsRestorePos,  setDocumentsRestorePos]  = useState({ x: 40, y: 18 });
   const [documentsSize,        setDocumentsSize]        = useState({ width: 400, height: 280 });
   const [subWins, setSubWins] = useState<SubWin[]>([]);
   // Which project is currently viewed inside the Projects window (null = root)
@@ -511,17 +511,17 @@ export default function Home() {
   const [printerOpen,        setPrinterOpen]        = useState(false);
   const [printerCollapsed,   setPrinterCollapsed]   = useState(false);
   const [printerMaximized,   setPrinterMaximized]   = useState(false);
-  const [printerPos,         setPrinterPos]         = useState({ x: 20, y: 20 });
-  const [printerSize,        setPrinterSize]        = useState({ width: 520, height: 520 });
-  const [printerRestoreSize, setPrinterRestoreSize] = useState({ width: 520, height: 520 });
-  const [printerRestorePos,  setPrinterRestorePos]  = useState({ x: 20, y: 20 });
+  const [printerPos,         setPrinterPos]         = useState({ x: 20, y: 15 });
+  const [printerSize,        setPrinterSize]        = useState({ width: 520, height: 440 });
+  const [printerRestoreSize, setPrinterRestoreSize] = useState({ width: 520, height: 440 });
+  const [printerRestorePos,  setPrinterRestorePos]  = useState({ x: 20, y: 15 });
   const [readmeOpen,        setReadmeOpen]        = useState(false);
   const [readmeCollapsed,   setReadmeCollapsed]   = useState(false);
   const [readmeMaximized,   setReadmeMaximized]   = useState(false);
-  const [readmeSize,        setReadmeSize]        = useState({ width: 640, height: 460 });
-  const [readmePos,         setReadmePos]         = useState({ x: 30, y: 20 });
-  const [readmeRestoreSize, setReadmeRestoreSize] = useState({ width: 640, height: 460 });
-  const [readmeRestorePos,  setReadmeRestorePos]  = useState({ x: 30, y: 20 });
+  const [readmeSize,        setReadmeSize]        = useState({ width: 640, height: 430 });
+  const [readmePos,         setReadmePos]         = useState({ x: 30, y: 12 });
+  const [readmeRestoreSize, setReadmeRestoreSize] = useState({ width: 640, height: 430 });
+  const [readmeRestorePos,  setReadmeRestorePos]  = useState({ x: 30, y: 12 });
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
   const desktopRef = useRef<HTMLDivElement>(null);
   const bootedRef  = useRef(false);
@@ -580,8 +580,8 @@ export default function Home() {
     const id = `${projectName}-${kind}-${Date.now()}`;
     const isAbout = kind === "about";
     // about.txt: larger window, left-leaning; video: smaller, right-leaning
-    const pos  = isAbout ? { x: 18, y: 22 }  : { x: 400, y: 48 };
-    const size = isAbout ? { width: 580, height: 460 } : { width: 440, height: 330 };
+    const pos  = isAbout ? { x: 18, y: 12 }  : { x: 380, y: 38 };
+    const size = isAbout ? { width: 560, height: 430 } : { width: 420, height: 320 };
     setSubWins(prev => [...prev, {
       id, projectName, kind,
       pos, size,
