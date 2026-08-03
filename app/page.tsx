@@ -1145,7 +1145,7 @@ export default function Home() {
                 >
                   <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
                     {/* Experience content */}
-                    <div style={{ flex: 1, overflowY: "auto", padding: "14px 18px", fontFamily: "var(--font-body-mono)", fontSize: 13, color: "#111", letterSpacing: "-0.03em" }}>
+                    <div style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "14px 18px", fontFamily: "var(--font-body-mono)", fontSize: 13, color: "#111", letterSpacing: "-0.03em" }}>
                       <div style={{ fontSize: 11, fontWeight: "bold", letterSpacing: "0.06em", color: "#888", marginBottom: 10 }}>EXPERIENCE</div>
                       <ExpCard
                         org="Columbia University"
