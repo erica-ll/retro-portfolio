@@ -540,10 +540,10 @@ export default function Home() {
   const [readmeOpen,        setReadmeOpen]        = useState(false);
   const [readmeCollapsed,   setReadmeCollapsed]   = useState(false);
   const [readmeMaximized,   setReadmeMaximized]   = useState(false);
-  const [readmeSize,        setReadmeSize]        = useState({ width: 640, height: 430 });
-  const [readmePos,         setReadmePos]         = useState({ x: 30, y: 12 });
-  const [readmeRestoreSize, setReadmeRestoreSize] = useState({ width: 640, height: 430 });
-  const [readmeRestorePos,  setReadmeRestorePos]  = useState({ x: 30, y: 12 });
+  const [readmeSize,        setReadmeSize]        = useState({ width: 480, height: 340 });
+  const [readmePos,         setReadmePos]         = useState({ x: 118, y: 70 });
+  const [readmeRestoreSize, setReadmeRestoreSize] = useState({ width: 480, height: 340 });
+  const [readmeRestorePos,  setReadmeRestorePos]  = useState({ x: 118, y: 70 });
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
   const desktopRef = useRef<HTMLDivElement>(null);
   const bootedRef  = useRef(false);
