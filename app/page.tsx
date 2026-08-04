@@ -960,7 +960,7 @@ export default function Home() {
                         </p>
                         <p style={{ margin: 0 }}>
                           My foundation is built on AI/ML research, including developing complex biomedical image segmentation architectures and evaluating predictive models. While my full technical history lives in my{" "}
-                          <a href="/Erica (Kela) Liu Resume.pdf" download="Erica (Kela) Liu Resume.pdf" style={{ color: "#00c" }}>resume</a>
+                          <span onClick={openPrinter} style={{ color: "#00c", cursor: "pointer", textDecoration: "underline" }}>resume</span>
                           , this workspace is dedicated to my interactive and visual projects.
                         </p>
                         <p style={{ margin: 0 }}>
