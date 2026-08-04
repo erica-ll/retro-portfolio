@@ -544,6 +544,13 @@ export default function Home() {
   const [readmePos,         setReadmePos]         = useState({ x: 118, y: 70 });
   const [readmeRestoreSize, setReadmeRestoreSize] = useState({ width: 480, height: 340 });
   const [readmeRestorePos,  setReadmeRestorePos]  = useState({ x: 118, y: 70 });
+  const [skillsOpen,        setSkillsOpen]        = useState(false);
+  const [skillsCollapsed,   setSkillsCollapsed]   = useState(false);
+  const [skillsMaximized,   setSkillsMaximized]   = useState(false);
+  const [skillsSize,        setSkillsSize]        = useState({ width: 380, height: 200 });
+  const [skillsPos,         setSkillsPos]         = useState({ x: 167, y: 140 });
+  const [skillsRestoreSize, setSkillsRestoreSize] = useState({ width: 380, height: 200 });
+  const [skillsRestorePos,  setSkillsRestorePos]  = useState({ x: 167, y: 140 });
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
   const desktopRef = useRef<HTMLDivElement>(null);
   const bootedRef  = useRef(false);
@@ -662,6 +669,20 @@ export default function Home() {
     }
   };
 
+  const toggleSkillsMaximize = () => {
+    if (!skillsMaximized) {
+      setSkillsRestoreSize(skillsSize);
+      setSkillsRestorePos(skillsPos);
+      setSkillsSize({ width: MAX_W, height: MAX_H });
+      setSkillsPos({ x: 5, y: 5 });
+      setSkillsMaximized(true);
+    } else {
+      setSkillsSize(skillsRestoreSize);
+      setSkillsPos(skillsRestorePos);
+      setSkillsMaximized(false);
+    }
+  };
+
   const togglePrinterMaximize = () => {
     if (!printerMaximized) {
       setPrinterRestoreSize(printerSize);
@@ -679,6 +700,12 @@ export default function Home() {
   const openPrinter = () => {
     setPrinterOpen(true);
     setActiveWindow("printer");
+    setSelectedIcon(null);
+  };
+
+  const openSkills = () => {
+    setSkillsOpen(true);
+    setActiveWindow("skills");
     setSelectedIcon(null);
   };
 
@@ -832,6 +859,13 @@ export default function Home() {
                 label="Trash"
                 selected={selectedIcon === "trash"}
                 onSelect={() => setSelectedIcon("trash")}
+              />
+              <DesktopIcon
+                src="/internet-location.png"
+                label="skills.txt"
+                selected={selectedIcon === "skills"}
+                onSelect={() => setSelectedIcon("skills")}
+                onOpen={openSkills}
               />
             </div>
 
@@ -1229,6 +1263,54 @@ export default function Home() {
               </div>
             )}
 
+            {/* Skills window */}
+            {skillsOpen && (
+              <div onMouseDown={() => setActiveWindow("skills")} style={{ display: "contents" }}>
+                <Window
+                  title="skills.txt"
+                  active={activeWindow === "skills"}
+                  draggable
+                  resizable={!skillsCollapsed}
+                  position={skillsPos}
+                  onPositionChange={setSkillsPos}
+                  width={skillsSize.width}
+                  height={skillsCollapsed ? TITLEBAR_H : skillsSize.height}
+                  onResize={(size) => setSkillsSize(size)}
+                  titleBar={
+                    <MacTitleBar
+                      title="skills.txt"
+                      onPositionChange={setSkillsPos}
+                      onClose={() => { setSkillsOpen(false); setActiveWindow(null); setSkillsCollapsed(false); setSkillsMaximized(false); }}
+                      onCollapse={() => setSkillsCollapsed(c => !c)}
+                      onZoom={toggleSkillsMaximize}
+                    />
+                  }
+                >
+                  <div style={{ height: "100%", overflowY: "auto", padding: "14px 16px", background: "linear-gradient(180deg, #d4d4d4 0%, #c8c8c8 100%)" }}>
+                    <div style={{ fontSize: 8, fontWeight: "bold", letterSpacing: "0.1em", color: "#fff", background: "#444", border: "2px solid #111", boxShadow: "inset 1px 1px 0 #888, inset -1px -1px 0 #222", padding: "2px 8px", marginBottom: 12, display: "inline-block", fontFamily: "var(--font-body-mono)" }}>TECH STACK</div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
+                      {([
+                        { name: "Python",  icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" },
+                        { name: "PyTorch", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pytorch/pytorch-original.svg" },
+                        { name: "React",   icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" },
+                        { name: "Unity",   icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/unity/unity-original.svg" },
+                        { name: "C#",      icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/csharp/csharp-original.svg" },
+                        { name: "C++",     icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg" },
+                        { name: "OpenCV",  icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/opencv/opencv-original.svg" },
+                      ] as { name: string; icon: string }[]).map(({ name, icon }) => (
+                        <div key={name} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 5, width: 60,
+                          border: "2px solid #111", borderRadius: 3, padding: "8px 6px 6px",
+                          background: "linear-gradient(150deg, #e8e8e8 0%, #d0d0d0 100%)",
+                          boxShadow: "inset 2px 2px 0 #ffffff, inset -2px -2px 0 #888888" }}>
+                          <img src={icon} alt={name} width={32} height={32} style={{ display: "block", imageRendering: "auto" }} />
+                          <span style={{ fontSize: 8, fontFamily: "var(--font-body-mono)", color: "#111", textAlign: "center", lineHeight: 1.2 }}>{name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </Window>
+              </div>
+            )}
 
           </div>
         </div>
