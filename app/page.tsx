@@ -981,10 +981,22 @@ export default function Home() {
                   ) : (
                     /* Project view: back button + file icons */
                     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-                      <div style={{ padding: "4px 10px", borderBottom: "1px solid #ccc", background: "#f0f0f0", flexShrink: 0 }}>
+                      <div style={{ padding: "5px 10px", borderBottom: "1px solid #999", background: "linear-gradient(180deg, #d4d4d4 0%, #c4c4c4 100%)", flexShrink: 0, boxShadow: "inset 0 -1px 0 #bbb" }}>
                         <button
                           onClick={() => setDocumentsCurrentProject(null)}
-                          style={{ border: "1px solid #aaa", borderRadius: 2, background: "#e0e0e0", padding: "1px 8px", cursor: "pointer", fontSize: 10, fontFamily: "var(--font-body-mono)" }}
+                          style={{
+                            border: "2px solid #111",
+                            borderRadius: 3,
+                            background: "linear-gradient(150deg, #e8e8e8 0%, #d0d0d0 100%)",
+                            boxShadow: "inset 2px 2px 0 #ffffff, inset -2px -2px 0 #888888",
+                            padding: "3px 10px",
+                            cursor: "pointer",
+                            fontSize: 10,
+                            fontWeight: "bold",
+                            fontFamily: "var(--font-body-mono)",
+                            color: "#111",
+                            letterSpacing: "-0.02em",
+                          }}
                         >← Projects</button>
                       </div>
                       <div style={{ flex: 1, overflowY: "auto", padding: 16, display: "grid", gridTemplateColumns: "repeat(auto-fill, 80px)", gap: "16px 12px", alignItems: "start", justifyContent: "start" }}>
@@ -1254,7 +1266,7 @@ export default function Home() {
                           src="/download-btn.png"
                           alt="Download PDF"
                           draggable={false}
-                          style={{ width: 168, height: "auto", imageRendering: "pixelated", display: "block", filter: "drop-shadow(2px 3px 0px rgba(0,0,0,0.55))" }}
+                          style={{ width: 130, height: "auto", imageRendering: "pixelated", display: "block", filter: "drop-shadow(2px 3px 0px rgba(0,0,0,0.55))" }}
                         />
                       </a>
                     </div>
