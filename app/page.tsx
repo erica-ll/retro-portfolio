@@ -942,37 +942,30 @@ export default function Home() {
                   }}>
                     <div style={{ padding: "20px 24px" }}>
 
-                      {/* Name + links */}
+                      {/* Name + title */}
                       <div style={{ marginBottom: 14 }}>
-                        <div style={{ fontSize: 19, fontWeight: "bold", marginBottom: 4 }}>Erica (Kela) Liu</div>
-                        <div style={{ fontSize: 11, color: "#555", marginBottom: 7 }}>
-                          Graduate Researcher &amp; AI/ML Engineer
-                        </div>
-                        <div style={{ display: "flex", gap: 10, fontSize: 11, flexWrap: "wrap" }}>
-                          <a href="mailto:kl3734@columbia.edu" style={{ color: "#00c" }}>Email</a>
-                          <span style={{ color: "#aaa" }}>·</span>
-                          <a href="https://linkedin.com/in/erica-liu684" target="_blank" rel="noopener noreferrer" style={{ color: "#00c" }}>LinkedIn</a>
-                          <span style={{ color: "#aaa" }}>·</span>
-                          <a href="https://github.com/erica-ll" target="_blank" rel="noopener noreferrer" style={{ color: "#00c" }}>GitHub</a>
+                        <div style={{ fontSize: 19, fontWeight: "bold", marginBottom: 5 }}>Erica (Kela) Liu</div>
+                        <div style={{ fontSize: 10, color: "#555", fontFamily: "var(--font-body-mono)", letterSpacing: "0.01em" }}>
+                          Graduate Researcher&nbsp;&nbsp;|&nbsp;&nbsp;AI/ML Engineer&nbsp;&nbsp;|&nbsp;&nbsp;Technical Game Developer
                         </div>
                       </div>
 
                       {/* Intro */}
-                      <div style={{
-                        fontSize: 11,
-                        lineHeight: 1.7,
-                        color: "#333",
-                        marginBottom: 8,
-                      }}>
-                        I&apos;m a CS grad student at Columbia (MS, Dec 2026), coming from UCSB where I studied
-                        Computer Science and Philosophy — a combination that still shapes how I think about systems
-                        and the people who use them. My work lives at the intersection of computer vision and
-                        generative AI: right now I&apos;m building a pipeline that animates static images into 2.5D
-                        character motion using depth maps, segmentation, and diffusion models. I&apos;ve also done
-                        research in biomedical image segmentation and spent a summer at a robotics startup pushing
-                        stereo synthesis under tight compute constraints. I&apos;m drawn to problems where perception
-                        and generation meet the real world — and I&apos;m always looking for the next hard thing to
-                        build.
+                      <div style={{ fontSize: 11, lineHeight: 1.7, color: "#333", display: "flex", flexDirection: "column", gap: 10 }}>
+                        <p style={{ margin: 0 }}>
+                          I&apos;m a CS master&apos;s student at Columbia University (prior: UCSB), operating at the intersection of AI engineering and technical game development.
+                        </p>
+                        <p style={{ margin: 0 }}>
+                          My core drive is building intelligent, interactive systems that push the boundaries of how we play and experience digital worlds. Right now, I&apos;m bridging these two fields: I&apos;m actively prototyping a voice-controlled cooperative 3D tower defense game that utilizes real-time audio spectrum analysis, while also researching multimodal pipelines that generate 2.5D character animations from text descriptions to interact with 3D world in photos.
+                        </p>
+                        <p style={{ margin: 0 }}>
+                          My foundation is built on AI/ML research, including developing complex biomedical image segmentation architectures and evaluating predictive models. While my full technical history lives in my{" "}
+                          <a href="/Erica (Kela) Liu Resume.pdf" download="Erica (Kela) Liu Resume.pdf" style={{ color: "#00c" }}>resume</a>
+                          , this workspace is dedicated to my interactive and visual projects.
+                        </p>
+                        <p style={{ margin: 0 }}>
+                          As an avid e-sports fan and XR developer, I&apos;m always looking for the next hard problem to solve in interactive media.
+                        </p>
                       </div>
 
                     </div>
