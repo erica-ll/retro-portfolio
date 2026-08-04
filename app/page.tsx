@@ -980,21 +980,19 @@ export default function Home() {
                     </div>
                   ) : (
                     /* Project view: back button + file icons */
-                    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-                      <div style={{ padding: "5px 10px", borderBottom: "1px solid #999", background: "linear-gradient(180deg, #d4d4d4 0%, #c4c4c4 100%)", flexShrink: 0, boxShadow: "inset 0 -1px 0 #bbb" }}>
-                        <button
-                          onClick={() => setDocumentsCurrentProject(null)}
-                          style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "block" }}
-                        >
-                          <img
-                            src="/back-btn.png"
-                            alt="← Projects"
-                            draggable={false}
-                            style={{ height: 22, width: "auto", imageRendering: "pixelated", display: "block", filter: "drop-shadow(1px 2px 0px rgba(0,0,0,0.5))" }}
-                          />
-                        </button>
-                      </div>
-                      <div style={{ flex: 1, overflowY: "auto", padding: 16, display: "grid", gridTemplateColumns: "repeat(auto-fill, 80px)", gap: "16px 12px", alignItems: "start", justifyContent: "start" }}>
+                    <div style={{ position: "relative", height: "100%" }}>
+                      <button
+                        onClick={() => setDocumentsCurrentProject(null)}
+                        style={{ position: "absolute", top: 10, left: 10, zIndex: 2, background: "none", border: "none", padding: 0, cursor: "pointer", display: "block" }}
+                      >
+                        <img
+                          src="/back-btn.png"
+                          alt="← Projects"
+                          draggable={false}
+                          style={{ height: 22, width: "auto", imageRendering: "pixelated", display: "block", filter: "drop-shadow(1px 2px 0px rgba(0,0,0,0.5))" }}
+                        />
+                      </button>
+                      <div style={{ height: "100%", overflowY: "auto", padding: "40px 16px 16px", display: "grid", gridTemplateColumns: "repeat(auto-fill, 80px)", gap: "16px 12px", alignItems: "start", justifyContent: "start" }}>
                         <IconButton
                           icon={<img src="/readme-icon.png" width={40} height={40} alt="" draggable={false} />}
                           label="about.txt" labelPosition="bottom" size="lg"
