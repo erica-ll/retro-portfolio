@@ -547,10 +547,10 @@ export default function Home() {
   const [skillsOpen,        setSkillsOpen]        = useState(false);
   const [skillsCollapsed,   setSkillsCollapsed]   = useState(false);
   const [skillsMaximized,   setSkillsMaximized]   = useState(false);
-  const [skillsSize,        setSkillsSize]        = useState({ width: 510, height: 190 });
-  const [skillsPos,         setSkillsPos]         = useState({ x: 100, y: 145 });
-  const [skillsRestoreSize, setSkillsRestoreSize] = useState({ width: 510, height: 190 });
-  const [skillsRestorePos,  setSkillsRestorePos]  = useState({ x: 100, y: 145 });
+  const [skillsSize,        setSkillsSize]        = useState({ width: 460, height: 250 });
+  const [skillsPos,         setSkillsPos]         = useState({ x: 125, y: 100 });
+  const [skillsRestoreSize, setSkillsRestoreSize] = useState({ width: 460, height: 250 });
+  const [skillsRestorePos,  setSkillsRestorePos]  = useState({ x: 125, y: 100 });
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
   const desktopRef = useRef<HTMLDivElement>(null);
   const bootedRef  = useRef(false);
@@ -1286,7 +1286,7 @@ export default function Home() {
                     />
                   }
                 >
-                  <div style={{ height: "100%", overflowY: "auto", padding: "12px 14px", background: "linear-gradient(180deg, #d4d4d4 0%, #c8c8c8 100%)", display: "flex", gap: 10 }}>
+                  <div style={{ height: "100%", overflowY: "auto", padding: "12px 14px", background: "linear-gradient(180deg, #d4d4d4 0%, #c8c8c8 100%)", display: "flex", gap: 12 }}>
                     {([
                       {
                         label: "ML / AI",
@@ -1300,39 +1300,38 @@ export default function Home() {
                       {
                         label: "Game Dev / XR",
                         items: [
-                          { name: "Unity",      icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/unity/unity-original.svg" },
-                          { name: "C#",         icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/csharp/csharp-original.svg" },
-                          { name: "Meta XR SDK", icon: null },
+                          { name: "Unity",       icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/unity/unity-original.svg" },
+                          { name: "C#",          icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/csharp/csharp-original.svg" },
+                          { name: "Meta XR SDK", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/meta/meta-original.svg" },
                         ],
                       },
                       {
                         label: "Software / Web",
                         items: [
-                          { name: "React",       icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" },
-                          { name: "Next.js",     icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg" },
-                          { name: "TypeScript",  icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" },
-                          { name: "AWS",         icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/amazonwebservices/amazonwebservices-plain-wordmark.svg" },
-                          { name: "C++",         icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg" },
-                          { name: "SQL",         icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg" },
+                          { name: "React",      icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" },
+                          { name: "Next.js",    icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg" },
+                          { name: "TypeScript", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" },
+                          { name: "AWS",        icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/amazonwebservices/amazonwebservices-plain-wordmark.svg" },
+                          { name: "C++",        icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg" },
+                          { name: "SQL",        icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg" },
                         ],
                       },
-                    ] as { label: string; items: { name: string; icon: string | null }[] }[]).map(({ label, items }) => (
-                      <div key={label} style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 7, fontWeight: "bold", letterSpacing: "0.1em", color: "#fff", background: "#444", border: "2px solid #111", boxShadow: "inset 1px 1px 0 #888, inset -1px -1px 0 #222", padding: "2px 6px", marginBottom: 8, display: "inline-block", fontFamily: "var(--font-body-mono)", whiteSpace: "nowrap" }}>{label}</div>
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                          {items.map(({ name, icon }) => (
-                            <div key={name} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, width: 40,
-                              border: "2px solid #111", borderRadius: 3, padding: "4px 3px 4px",
-                              background: "linear-gradient(150deg, #e8e8e8 0%, #d0d0d0 100%)",
-                              boxShadow: "inset 2px 2px 0 #ffffff, inset -2px -2px 0 #888888" }}>
-                              {icon
-                                ? <img src={icon} alt={name} width={20} height={20} style={{ display: "block" }} />
-                                : <div style={{ width: 20, height: 20, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 6, fontWeight: "bold", color: "#0066cc", fontFamily: "var(--font-body-mono)", textAlign: "center", lineHeight: 1.2 }}>META{"\n"}XR</div>
-                              }
-                              <span style={{ fontSize: 7, fontFamily: "var(--font-body-mono)", color: "#111", textAlign: "center", lineHeight: 1.2 }}>{name}</span>
+                    ] as { label: string; items: { name: string; icon: string }[] }[]).map(({ label, items }) => (
+                      <div key={label} style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 5 }}>
+                        <div style={{ fontSize: 7, fontWeight: "bold", letterSpacing: "0.1em", color: "#fff", background: "#444", border: "2px solid #111", boxShadow: "inset 1px 1px 0 #888, inset -1px -1px 0 #222", padding: "2px 6px", marginBottom: 3, display: "block", fontFamily: "var(--font-body-mono)", textAlign: "center" }}>{label}</div>
+                        {items.map(({ name, icon }) => (
+                          <div key={name} style={{
+                            display: "flex", alignItems: "center", gap: 6,
+                            border: "2px solid #111", borderRadius: 3, padding: "4px 8px",
+                            background: "linear-gradient(150deg, #e8e8e8 0%, #d0d0d0 100%)",
+                            boxShadow: "inset 2px 2px 0 #ffffff, inset -2px -2px 0 #888888",
+                          }}>
+                            <div style={{ width: 14, height: 14, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              <img src={icon} alt={name} style={{ width: 14, height: 14, objectFit: "contain", display: "block" }} />
                             </div>
-                          ))}
-                        </div>
+                            <span style={{ fontSize: 9, fontFamily: "var(--font-body-mono)", color: "#111", whiteSpace: "nowrap" }}>{name}</span>
+                          </div>
+                        ))}
                       </div>
                     ))}
                   </div>
