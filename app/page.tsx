@@ -60,7 +60,7 @@ function Clock() {
     return () => clearInterval(id);
   }, []);
   return (
-    <span style={{ fontSize: 10, fontFamily: "var(--font-body-mono)" }}>{time}</span>
+    <span style={{ fontSize: 11, fontFamily: "var(--font-body-mono)" }}>{time}</span>
   );
 }
 
@@ -408,9 +408,9 @@ function ExpCard({ org, role, period, project, bullets }: {
       marginBottom: 10,
     }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 2 }}>
-        <span style={{ fontWeight: "bold", fontSize: 11, color: "#111" }}>{org}</span>
+        <span style={{ fontWeight: "bold", fontSize: 12, color: "#111" }}>{org}</span>
         <span style={{
-          fontSize: 9,
+          fontSize: 10,
           color: "#fff",
           background: "#555",
           border: "1px solid #222",
@@ -420,10 +420,10 @@ function ExpCard({ org, role, period, project, bullets }: {
           fontFamily: "var(--font-body-mono)",
         }}>{period}</span>
       </div>
-      <div style={{ fontSize: 10, color: "#333", fontStyle: "italic", marginBottom: project ? 2 : 5 }}>{role}</div>
+      <div style={{ fontSize: 11, color: "#333", fontStyle: "italic", marginBottom: project ? 2 : 5 }}>{role}</div>
       {project && (
         <div style={{
-          fontSize: 9,
+          fontSize: 10,
           color: "#1a3a6e",
           background: "linear-gradient(90deg, #b8c8e8 0%, #a8b8d8 100%)",
           border: "1px solid #4466aa",
@@ -436,7 +436,7 @@ function ExpCard({ org, role, period, project, bullets }: {
       )}
       <ul style={{ margin: 0, paddingLeft: 16 }}>
         {bullets.map((b, i) => (
-          <li key={i} style={{ fontSize: 10, lineHeight: 1.5, color: "#222", marginBottom: 2 }}>{b}</li>
+          <li key={i} style={{ fontSize: 11, lineHeight: 1.5, color: "#222", marginBottom: 2 }}>{b}</li>
         ))}
       </ul>
     </div>
@@ -897,7 +897,7 @@ export default function Home() {
                     height: "100%",
                     overflowY: "auto",
                     fontFamily: "var(--font-body-mono)",
-                    fontSize: 11,
+                    fontSize: 12,
                     color: "#111",
                     letterSpacing: "-0.03em",
                   }}>
@@ -905,11 +905,11 @@ export default function Home() {
 
                       {/* Name + links */}
                       <div style={{ marginBottom: 14 }}>
-                        <div style={{ fontSize: 18, fontWeight: "bold", marginBottom: 4 }}>Erica (Kela) Liu</div>
-                        <div style={{ fontSize: 10, color: "#555", marginBottom: 7 }}>
+                        <div style={{ fontSize: 19, fontWeight: "bold", marginBottom: 4 }}>Erica (Kela) Liu</div>
+                        <div style={{ fontSize: 11, color: "#555", marginBottom: 7 }}>
                           Graduate Researcher &amp; AI/ML Engineer
                         </div>
-                        <div style={{ display: "flex", gap: 10, fontSize: 10, flexWrap: "wrap" }}>
+                        <div style={{ display: "flex", gap: 10, fontSize: 11, flexWrap: "wrap" }}>
                           <a href="mailto:kl3734@columbia.edu" style={{ color: "#00c" }}>Email</a>
                           <span style={{ color: "#aaa" }}>·</span>
                           <a href="https://linkedin.com/in/erica-liu684" target="_blank" rel="noopener noreferrer" style={{ color: "#00c" }}>LinkedIn</a>
@@ -920,7 +920,7 @@ export default function Home() {
 
                       {/* Intro */}
                       <div style={{
-                        fontSize: 10,
+                        fontSize: 11,
                         lineHeight: 1.7,
                         color: "#333",
                         marginBottom: 8,
@@ -1034,8 +1034,8 @@ export default function Home() {
                 >
                   {/* VR Escape Room — about.txt */}
                   {win.kind === "about" && win.projectName === "VR Escape Room" && (
-                    <div style={{ height: "100%", overflowY: "auto", padding: "14px 18px", fontFamily: "var(--font-body-mono)", fontSize: 9, letterSpacing: "-0.03em", color: "#222" }}>
-                      <h2 style={{ fontSize: 12, fontWeight: "bold", marginBottom: 3 }}>VR Escape Room: Chrono Paradox</h2>
+                    <div style={{ height: "100%", overflowY: "auto", padding: "14px 18px", fontFamily: "var(--font-body-mono)", fontSize: 10, letterSpacing: "-0.03em", color: "#222" }}>
+                      <h2 style={{ fontSize: 13, fontWeight: "bold", marginBottom: 3 }}>VR Escape Room: Chrono Paradox</h2>
                       <div style={{ fontSize: 10, color: "#888", marginBottom: 10, fontStyle: "italic" }}>Meta Quest · Unity · Multi-Stage Puzzle VR</div>
                       <p style={{ lineHeight: 1.7, marginBottom: 14, color: "#333" }}>
                         A thematic VR escape room developed for the Meta Quest, utilizing Unity and the Meta XR SDK.
@@ -1044,22 +1044,22 @@ export default function Home() {
                       </p>
                       <div style={{ fontSize: 9, fontWeight: "bold", letterSpacing: "0.08em", color: "#888", marginBottom: 6, textTransform: "uppercase" }}>Core Systems</div>
                       <div style={{ marginBottom: 12 }}>
-                        <div style={{ fontWeight: "bold", fontSize: 9, marginBottom: 4, color: "#111" }}>Dynamic Asset Swapping (Time Barrier)</div>
+                        <div style={{ fontWeight: "bold", fontSize: 10, marginBottom: 4, color: "#111" }}>Dynamic Asset Swapping (Time Barrier)</div>
                         <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Engineered a spatial trigger system that updates 3D meshes and materials in real-time. When grabbed objects cross a localized &ldquo;time barrier,&rdquo; their visual states transition between future and retro aesthetics without interrupting the XR grab interaction.</p>
                       </div>
                       <div style={{ marginBottom: 12 }}>
-                        <div style={{ fontWeight: "bold", fontSize: 9, marginBottom: 4, color: "#111" }}>Real-Time Spatial Minimap</div>
+                        <div style={{ fontWeight: "bold", fontSize: 10, marginBottom: 4, color: "#111" }}>Real-Time Spatial Minimap</div>
                         <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Architected a dynamic wayfinding system that continuously tracks the player&apos;s spatial transform data and mathematically maps it to a responsive 2D UI interface.</p>
                       </div>
                       <div style={{ marginBottom: 12 }}>
-                        <div style={{ fontWeight: "bold", fontSize: 9, marginBottom: 4, color: "#111" }}>State-Driven UI Markers</div>
+                        <div style={{ fontWeight: "bold", fontSize: 10, marginBottom: 4, color: "#111" }}>State-Driven UI Markers</div>
                         <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Implemented an event-driven logic system for map markers. Exploration flags automatically update their visual states (from unexplored to completed) by listening to specific puzzle triggers and player location data.</p>
                       </div>
                       <div style={{ marginBottom: 14 }}>
-                        <div style={{ fontWeight: "bold", fontSize: 9, marginBottom: 4, color: "#111" }}>Collaborative Systems Design</div>
+                        <div style={{ fontWeight: "bold", fontSize: 10, marginBottom: 4, color: "#111" }}>Collaborative Systems Design</div>
                         <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Co-designed the core logic and puzzles with teammates, linking exploratory tasks (e.g., the bookshelf passcode search) with mechanical obstacles (e.g., the buzz-wire challenge) to construct a complete escape sequence.</p>
                       </div>
-                      <div style={{ borderTop: "1px solid #ddd", paddingTop: 10, fontSize: 8, color: "#666", lineHeight: 1.8 }}>
+                      <div style={{ borderTop: "1px solid #ddd", paddingTop: 10, fontSize: 9, color: "#666", lineHeight: 1.8 }}>
                         <div><strong>Platform:</strong> Meta Quest</div>
                         <div><strong>Tech Stack:</strong> Unity 3D | C# | Meta XR SDK | XR Interaction Toolkit (XRI) | Spatial UI</div>
                       </div>
@@ -1077,8 +1077,8 @@ export default function Home() {
 
                   {/* Zoo XR — about.txt */}
                   {win.kind === "about" && win.projectName === "Zoo XR" && (
-                    <div style={{ height: "100%", overflowY: "auto", padding: "14px 18px", fontFamily: "var(--font-body-mono)", fontSize: 9, letterSpacing: "-0.03em", color: "#222" }}>
-                      <h2 style={{ fontSize: 12, fontWeight: "bold", marginBottom: 3 }}>Zoo XR</h2>
+                    <div style={{ height: "100%", overflowY: "auto", padding: "14px 18px", fontFamily: "var(--font-body-mono)", fontSize: 10, letterSpacing: "-0.03em", color: "#222" }}>
+                      <h2 style={{ fontSize: 13, fontWeight: "bold", marginBottom: 3 }}>Zoo XR</h2>
                       <div style={{ fontSize: 10, color: "#888", marginBottom: 10, fontStyle: "italic" }}>Cross-Platform AR Builder to VR Experience</div>
                       <p style={{ lineHeight: 1.7, marginBottom: 14, color: "#333" }}>
                         An end-to-end XR application featuring an augmented reality mobile builder interface for spatial design,
@@ -1087,11 +1087,11 @@ export default function Home() {
                       </p>
                       <div style={{ fontSize: 9, fontWeight: "bold", letterSpacing: "0.08em", color: "#888", marginBottom: 6, textTransform: "uppercase" }}>Core Systems</div>
                       <div style={{ marginBottom: 12 }}>
-                        <div style={{ fontWeight: "bold", fontSize: 9, marginBottom: 4, color: "#111" }}>Cross-Platform Serialization Pipeline</div>
+                        <div style={{ fontWeight: "bold", fontSize: 10, marginBottom: 4, color: "#111" }}>Cross-Platform Serialization Pipeline</div>
                         <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Designed a data pipeline to export the entire AR scene layout — objects, transforms, and enclosure metadata — into a JSON format, enabling dynamic deserialization and full scene reconstruction in the VR environment.</p>
                       </div>
                       <div style={{ marginBottom: 12 }}>
-                        <div style={{ fontWeight: "bold", fontSize: 9, marginBottom: 4, color: "#111" }}>Rule-Based Validation System (AR)</div>
+                        <div style={{ fontWeight: "bold", fontSize: 10, marginBottom: 4, color: "#111" }}>Rule-Based Validation System (AR)</div>
                         <p style={{ lineHeight: 1.7, color: "#444", marginBottom: 8 }}>Constraint-checking architecture to validate scene logic before VR export:</p>
                         <ul style={{ margin: 0, paddingLeft: 16, color: "#444", lineHeight: 1.8 }}>
                           <li>Calculates spatial relationships to ensure all enclosures are fully fenced and contain animals</li>
@@ -1100,18 +1100,18 @@ export default function Home() {
                         <div style={{ marginTop: 10, background: "#eee", border: "1px dashed #bbb", borderRadius: 3, padding: "18px 12px", textAlign: "center", color: "#999", fontSize: 9, letterSpacing: "0.06em" }}>[ CONSTRAINT VALIDATION SCREENSHOTS ]</div>
                       </div>
                       <div style={{ marginBottom: 12 }}>
-                        <div style={{ fontWeight: "bold", fontSize: 9, marginBottom: 4, color: "#111" }}>Spatial Anchoring &amp; Scaling (AR)</div>
+                        <div style={{ fontWeight: "bold", fontSize: 10, marginBottom: 4, color: "#111" }}>Spatial Anchoring &amp; Scaling (AR)</div>
                         <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Implemented individual object manipulation (translate / rotate / scale) alongside a global scaling system with a 1-meter physical reference, ensuring accurate real-world size mapping when transitioning from mobile AR to the VR headset.</p>
                       </div>
                       <div style={{ marginBottom: 12 }}>
-                        <div style={{ fontWeight: "bold", fontSize: 9, marginBottom: 4, color: "#111" }}>Behavioral State Machines (VR)</div>
+                        <div style={{ fontWeight: "bold", fontSize: 10, marginBottom: 4, color: "#111" }}>Behavioral State Machines (VR)</div>
                         <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Programmed Finite State Machines for animal AI. Animals dynamically transition between states — fleeing out of fear, eating, following the player — based on proximity and player interactions.</p>
                       </div>
                       <div style={{ marginBottom: 14 }}>
-                        <div style={{ fontWeight: "bold", fontSize: 9, marginBottom: 4, color: "#111" }}>Physics-Based Interactions (VR)</div>
+                        <div style={{ fontWeight: "bold", fontSize: 10, marginBottom: 4, color: "#111" }}>Physics-Based Interactions (VR)</div>
                         <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Implemented hands-on VR mechanics including physics-driven enclosure doors and visual petting interactions that update animals&apos; internal emotional states.</p>
                       </div>
-                      <div style={{ borderTop: "1px solid #ddd", paddingTop: 10, fontSize: 8, color: "#666", lineHeight: 1.8 }}>
+                      <div style={{ borderTop: "1px solid #ddd", paddingTop: 10, fontSize: 9, color: "#666", lineHeight: 1.8 }}>
                         <div><strong>Platform:</strong> iOS (AR) · Meta Quest 3 (VR)</div>
                         <div><strong>Tech Stack:</strong> Unity 3D | C# | AR Foundation | XR Interaction Toolkit (XRI) | Meta Quest SDK</div>
                       </div>
@@ -1120,8 +1120,8 @@ export default function Home() {
 
                   {/* Creatures in TV — about.txt */}
                   {win.kind === "about" && win.projectName === "Creatures in TV" && (
-                    <div style={{ height: "100%", overflowY: "auto", padding: "14px 18px", fontFamily: "var(--font-body-mono)", fontSize: 9, letterSpacing: "-0.03em", color: "#222" }}>
-                      <h2 style={{ fontSize: 12, fontWeight: "bold", marginBottom: 3 }}>Creatures in TV</h2>
+                    <div style={{ height: "100%", overflowY: "auto", padding: "14px 18px", fontFamily: "var(--font-body-mono)", fontSize: 10, letterSpacing: "-0.03em", color: "#222" }}>
+                      <h2 style={{ fontSize: 13, fontWeight: "bold", marginBottom: 3 }}>Creatures in TV</h2>
                       <div style={{ fontSize: 10, color: "#888", marginBottom: 10, fontStyle: "italic" }}>Multimodal Text-to-Animation Pipeline</div>
                       <p style={{ lineHeight: 1.7, marginBottom: 14, color: "#333" }}>
                         A full-stack, cloud-deployed AI application that transforms static 2D photos into dynamic animated scenes
@@ -1131,19 +1131,19 @@ export default function Home() {
                       </p>
                       <div style={{ fontSize: 9, fontWeight: "bold", letterSpacing: "0.08em", color: "#888", marginBottom: 6, textTransform: "uppercase" }}>Core Systems</div>
                       <div style={{ marginBottom: 12 }}>
-                        <div style={{ fontWeight: "bold", fontSize: 9, marginBottom: 4, color: "#111" }}>Generative Asset Pipeline</div>
+                        <div style={{ fontWeight: "bold", fontSize: 10, marginBottom: 4, color: "#111" }}>Generative Asset Pipeline</div>
                         <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Integrated the Gemini API to dynamically generate creature concepts and corresponding multi-action sprite sheets from user text prompts.</p>
                       </div>
                       <div style={{ marginBottom: 12 }}>
-                        <div style={{ fontWeight: "bold", fontSize: 9, marginBottom: 4, color: "#111" }}>Computer Vision &amp; Scene Processing</div>
+                        <div style={{ fontWeight: "bold", fontSize: 10, marginBottom: 4, color: "#111" }}>Computer Vision &amp; Scene Processing</div>
                         <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Engineered a backend Python pipeline utilizing SAM2 (Segment Anything Model 2) to process user-uploaded photos, automatically generating segmented masks and depth maps for spatial awareness.</p>
                       </div>
                       <div style={{ marginBottom: 12 }}>
-                        <div style={{ fontWeight: "bold", fontSize: 9, marginBottom: 4, color: "#111" }}>Algorithmic Trajectory &amp; Depth Logic</div>
+                        <div style={{ fontWeight: "bold", fontSize: 10, marginBottom: 4, color: "#111" }}>Algorithmic Trajectory &amp; Depth Logic</div>
                         <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Developed an auto-pathing recommendation algorithm that analyzes scene masks to suggest realistic traversal routes. Implemented depth-sorting logic to ensure creatures seamlessly occlude or hide behind real-world objects in the photo.</p>
                       </div>
                       <div style={{ marginBottom: 14 }}>
-                        <div style={{ fontWeight: "bold", fontSize: 9, marginBottom: 4, color: "#111" }}>Cloud Infrastructure &amp; Deployment</div>
+                        <div style={{ fontWeight: "bold", fontSize: 10, marginBottom: 4, color: "#111" }}>Cloud Infrastructure &amp; Deployment</div>
                         <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Containerized the heavy machine-learning backend and web frontend, successfully deploying the end-to-end application on AWS ECS (Elastic Container Service) for public web access.</p>
                       </div>
 
@@ -1167,7 +1167,7 @@ export default function Home() {
                         </p>
                       </div>
 
-                      <div style={{ borderTop: "1px solid #ddd", paddingTop: 10, fontSize: 8, color: "#666", lineHeight: 1.8 }}>
+                      <div style={{ borderTop: "1px solid #ddd", paddingTop: 10, fontSize: 9, color: "#666", lineHeight: 1.8 }}>
                         <div><strong>Tech Stack:</strong> Python | Gemini API | SAM2 (Computer Vision) | AWS ECS | Web Frontend (JS/HTML) | Generative AI</div>
                       </div>
                     </div>
@@ -1199,8 +1199,8 @@ export default function Home() {
                     />
                   }
                 >
-                  <div style={{ height: "100%", overflowY: "auto", padding: "12px 14px", fontFamily: "var(--font-body-mono)", fontSize: 11, color: "#111", letterSpacing: "-0.03em", background: "linear-gradient(180deg, #d4d4d4 0%, #c8c8c8 100%)" }}>
-                    <div style={{ fontSize: 8, fontWeight: "bold", letterSpacing: "0.1em", color: "#fff", background: "#444", border: "2px solid #111", boxShadow: "inset 1px 1px 0 #888, inset -1px -1px 0 #222", padding: "2px 8px", marginBottom: 10, display: "inline-block" }}>EXPERIENCE</div>
+                  <div style={{ height: "100%", overflowY: "auto", padding: "12px 14px", fontFamily: "var(--font-body-mono)", fontSize: 12, color: "#111", letterSpacing: "-0.03em", background: "linear-gradient(180deg, #d4d4d4 0%, #c8c8c8 100%)" }}>
+                    <div style={{ fontSize: 9, fontWeight: "bold", letterSpacing: "0.1em", color: "#fff", background: "#444", border: "2px solid #111", boxShadow: "inset 1px 1px 0 #888, inset -1px -1px 0 #222", padding: "2px 8px", marginBottom: 10, display: "inline-block" }}>EXPERIENCE</div>
                     <ExpCard
                       org="Columbia University"
                       role="Research Assistant"
@@ -1329,7 +1329,7 @@ export default function Home() {
                             <div style={{ width: 14, height: 14, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                               {icon && <img src={icon} alt={name} style={{ width: 14, height: 14, objectFit: "contain", display: "block" }} />}
                             </div>
-                            <span style={{ fontSize: 9, fontWeight: 600, fontFamily: "var(--font-body-mono)", color: "#111", whiteSpace: "nowrap" }}>{name}</span>
+                            <span style={{ fontSize: 8, fontWeight: 600, fontFamily: "var(--font-body-mono)", color: "#111", whiteSpace: "nowrap" }}>{name}</span>
                           </div>
                         ))}
                       </div>
