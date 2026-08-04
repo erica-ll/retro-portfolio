@@ -984,20 +984,15 @@ export default function Home() {
                       <div style={{ padding: "5px 10px", borderBottom: "1px solid #999", background: "linear-gradient(180deg, #d4d4d4 0%, #c4c4c4 100%)", flexShrink: 0, boxShadow: "inset 0 -1px 0 #bbb" }}>
                         <button
                           onClick={() => setDocumentsCurrentProject(null)}
-                          style={{
-                            border: "2px solid #111",
-                            borderRadius: 3,
-                            background: "linear-gradient(150deg, #e8e8e8 0%, #d0d0d0 100%)",
-                            boxShadow: "inset 2px 2px 0 #ffffff, inset -2px -2px 0 #888888",
-                            padding: "3px 10px",
-                            cursor: "pointer",
-                            fontSize: 10,
-                            fontWeight: "bold",
-                            fontFamily: "var(--font-body-mono)",
-                            color: "#111",
-                            letterSpacing: "-0.02em",
-                          }}
-                        >← Projects</button>
+                          style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "block" }}
+                        >
+                          <img
+                            src="/back-btn.png"
+                            alt="← Projects"
+                            draggable={false}
+                            style={{ height: 22, width: "auto", imageRendering: "pixelated", display: "block", filter: "drop-shadow(1px 2px 0px rgba(0,0,0,0.5))" }}
+                          />
+                        </button>
                       </div>
                       <div style={{ flex: 1, overflowY: "auto", padding: 16, display: "grid", gridTemplateColumns: "repeat(auto-fill, 80px)", gap: "16px 12px", alignItems: "start", justifyContent: "start" }}>
                         <IconButton
