@@ -1294,7 +1294,7 @@ export default function Home() {
                           { name: "Python",      icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" },
                           { name: "PyTorch",     icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pytorch/pytorch-original.svg" },
                           { name: "OpenCV",      icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/opencv/opencv-original.svg" },
-                          { name: "HuggingFace", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/huggingface/huggingface-original.svg" },
+                          { name: "HuggingFace", icon: "/huggingface-icon.png" },
                         ],
                       },
                       {
@@ -1302,7 +1302,7 @@ export default function Home() {
                         items: [
                           { name: "Unity",       icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/unity/unity-original.svg" },
                           { name: "C#",          icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/csharp/csharp-original.svg" },
-                          { name: "Meta XR SDK", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/meta/meta-original.svg" },
+                          { name: "Meta XR SDK", icon: null },
                         ],
                       },
                       {
@@ -1316,7 +1316,7 @@ export default function Home() {
                           { name: "SQL",        icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg" },
                         ],
                       },
-                    ] as { label: string; items: { name: string; icon: string }[] }[]).map(({ label, items }) => (
+                    ] as { label: string; items: { name: string; icon: string | null }[] }[]).map(({ label, items }) => (
                       <div key={label} style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 5 }}>
                         <div style={{ fontSize: 7, fontWeight: "bold", letterSpacing: "0.1em", color: "#fff", background: "#444", border: "2px solid #111", boxShadow: "inset 1px 1px 0 #888, inset -1px -1px 0 #222", padding: "2px 6px", marginBottom: 3, display: "block", fontFamily: "var(--font-body-mono)", textAlign: "center" }}>{label}</div>
                         {items.map(({ name, icon }) => (
@@ -1327,7 +1327,7 @@ export default function Home() {
                             boxShadow: "inset 2px 2px 0 #ffffff, inset -2px -2px 0 #888888",
                           }}>
                             <div style={{ width: 14, height: 14, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                              <img src={icon} alt={name} style={{ width: 14, height: 14, objectFit: "contain", display: "block" }} />
+                              {icon && <img src={icon} alt={name} style={{ width: 14, height: 14, objectFit: "contain", display: "block" }} />}
                             </div>
                             <span style={{ fontSize: 9, fontFamily: "var(--font-body-mono)", color: "#111", whiteSpace: "nowrap" }}>{name}</span>
                           </div>
