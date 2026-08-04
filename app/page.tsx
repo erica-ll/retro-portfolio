@@ -554,6 +554,15 @@ export default function Home() {
   const [skillsPos,         setSkillsPos]         = useState({ x: 125, y: 100 });
   const [skillsRestoreSize, setSkillsRestoreSize] = useState({ width: 460, height: 250 });
   const [skillsRestorePos,  setSkillsRestorePos]  = useState({ x: 125, y: 100 });
+  const [contactOpen,        setContactOpen]        = useState(false);
+  const [contactCollapsed,   setContactCollapsed]   = useState(false);
+  const [contactMaximized,   setContactMaximized]   = useState(false);
+  const [contactSize,        setContactSize]        = useState({ width: 340, height: 290 });
+  const [contactPos,         setContactPos]         = useState({ x: 160, y: 80 });
+  const [contactRestoreSize, setContactRestoreSize] = useState({ width: 340, height: 290 });
+  const [contactRestorePos,  setContactRestorePos]  = useState({ x: 160, y: 80 });
+  const [contactFrom,   setContactFrom]   = useState("");
+  const [contactMsg,    setContactMsg]    = useState("");
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
   const desktopRef = useRef<HTMLDivElement>(null);
   const bootedRef  = useRef(false);
@@ -709,6 +718,26 @@ export default function Home() {
   const openSkills = () => {
     setSkillsOpen(true);
     setActiveWindow("skills");
+    setSelectedIcon(null);
+  };
+
+  const toggleContactMaximize = () => {
+    if (!contactMaximized) {
+      setContactRestoreSize(contactSize);
+      setContactRestorePos(contactPos);
+      setContactSize({ width: MAX_W, height: MAX_H });
+      setContactPos({ x: 5, y: 5 });
+      setContactMaximized(true);
+    } else {
+      setContactSize(contactRestoreSize);
+      setContactPos(contactRestorePos);
+      setContactMaximized(false);
+    }
+  };
+
+  const openContact = () => {
+    setContactOpen(true);
+    setActiveWindow("contact");
     setSelectedIcon(null);
   };
 
@@ -869,6 +898,13 @@ export default function Home() {
                 selected={selectedIcon === "skills"}
                 onSelect={() => setSelectedIcon("skills")}
                 onOpen={openSkills}
+              />
+              <DesktopIcon
+                src="/mail-icon.png"
+                label="contact"
+                selected={selectedIcon === "contact"}
+                onSelect={() => setSelectedIcon("contact")}
+                onOpen={openContact}
               />
             </div>
 
@@ -1342,6 +1378,81 @@ export default function Home() {
                         ))}
                       </div>
                     ))}
+                  </div>
+                </Window>
+              </div>
+            )}
+
+            {/* Contact window */}
+            {contactOpen && (
+              <div onMouseDown={() => setActiveWindow("contact")} style={{ display: "contents" }}>
+                <Window
+                  title="contact"
+                  active={activeWindow === "contact"}
+                  draggable
+                  resizable={!contactCollapsed}
+                  position={contactPos}
+                  onPositionChange={setContactPos}
+                  width={contactSize.width}
+                  height={contactCollapsed ? TITLEBAR_H : contactSize.height}
+                  onResize={(size) => setContactSize(size)}
+                  titleBar={
+                    <MacTitleBar
+                      title="contact"
+                      onPositionChange={setContactPos}
+                      onClose={() => { setContactOpen(false); setActiveWindow(null); setContactCollapsed(false); setContactMaximized(false); }}
+                      onCollapse={() => setContactCollapsed(c => !c)}
+                      onZoom={toggleContactMaximize}
+                    />
+                  }
+                >
+                  <div style={{ height: "100%", display: "flex", flexDirection: "column", background: "linear-gradient(180deg, #d4d4d4 0%, #c8c8c8 100%)", padding: "12px 14px", fontFamily: "var(--font-body-mono)" }}>
+                    <div style={{ fontSize: 9, fontWeight: "bold", letterSpacing: "0.1em", color: "#fff", background: "#444", border: "2px solid #111", boxShadow: "inset 1px 1px 0 #888, inset -1px -1px 0 #222", padding: "2px 8px", marginBottom: 12, display: "inline-block" }}>NEW MESSAGE</div>
+
+                    {/* To: row — fixed */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                      <span style={{ fontSize: 9, color: "#555", width: 38, flexShrink: 0, textAlign: "right" }}>To:</span>
+                      <div style={{ flex: 1, fontSize: 10, color: "#111", background: "linear-gradient(150deg, #e8e8e8 0%, #d8d8d8 100%)", border: "2px solid #111", boxShadow: "inset 1px 1px 0 #fff, inset -1px -1px 0 #bbb", padding: "2px 6px", borderRadius: 2 }}>
+                        ericaliu684@gmail.com
+                      </div>
+                    </div>
+
+                    {/* From: row — editable */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                      <span style={{ fontSize: 9, color: "#555", width: 38, flexShrink: 0, textAlign: "right" }}>From:</span>
+                      <input
+                        type="email"
+                        placeholder="your@email.com"
+                        value={contactFrom}
+                        onChange={e => setContactFrom(e.target.value)}
+                        style={{ flex: 1, fontSize: 10, color: "#111", fontFamily: "var(--font-body-mono)", background: "#fff", border: "2px solid #111", boxShadow: "inset 1px 1px 0 #999, inset -1px -1px 0 #eee", padding: "2px 6px", borderRadius: 2, outline: "none" }}
+                      />
+                    </div>
+
+                    {/* Message — grows to fill */}
+                    <div style={{ display: "flex", gap: 6, flex: 1, minHeight: 0, marginBottom: 10 }}>
+                      <span style={{ fontSize: 9, color: "#555", width: 38, flexShrink: 0, textAlign: "right", paddingTop: 3 }}>Msg:</span>
+                      <textarea
+                        placeholder="Say hi..."
+                        value={contactMsg}
+                        onChange={e => setContactMsg(e.target.value)}
+                        style={{ flex: 1, resize: "none", fontSize: 10, color: "#111", fontFamily: "var(--font-body-mono)", background: "#fff", border: "2px solid #111", boxShadow: "inset 1px 1px 0 #999, inset -1px -1px 0 #eee", padding: "4px 6px", borderRadius: 2, outline: "none", lineHeight: 1.5 }}
+                      />
+                    </div>
+
+                    {/* Send button */}
+                    <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                      <button
+                        onClick={() => {
+                          const sub = encodeURIComponent("Hey from your portfolio!");
+                          const body = encodeURIComponent(`From: ${contactFrom}\n\n${contactMsg}`);
+                          window.location.href = `mailto:ericaliu684@gmail.com?subject=${sub}&body=${body}`;
+                        }}
+                        style={{ border: "2px solid #111", borderRadius: 3, background: "linear-gradient(150deg, #e8e8e8 0%, #d0d0d0 100%)", boxShadow: "inset 2px 2px 0 #ffffff, inset -2px -2px 0 #888888", padding: "4px 16px", cursor: "pointer", fontSize: 10, fontWeight: "bold", fontFamily: "var(--font-body-mono)", color: "#111", letterSpacing: "-0.02em" }}
+                      >
+                        Send ✉
+                      </button>
+                    </div>
                   </div>
                 </Window>
               </div>
