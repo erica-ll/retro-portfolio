@@ -1322,14 +1322,14 @@ export default function Home() {
                         {items.map(({ name, icon }) => (
                           <div key={name} style={{
                             display: "flex", alignItems: "center", gap: 6,
-                            border: "2px solid #111", borderRadius: 3, padding: "4px 8px",
-                            background: "linear-gradient(150deg, #e8e8e8 0%, #d0d0d0 100%)",
-                            boxShadow: "inset 2px 2px 0 #ffffff, inset -2px -2px 0 #888888",
+                            border: "1px solid #aaa", borderRadius: 3, padding: "4px 8px",
+                            background: "linear-gradient(150deg, #e8e8e8 0%, #d8d8d8 100%)",
+                            boxShadow: "inset 1px 1px 0 #fff, inset -1px -1px 0 #bbb",
                           }}>
                             <div style={{ width: 14, height: 14, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                               {icon && <img src={icon} alt={name} style={{ width: 14, height: 14, objectFit: "contain", display: "block" }} />}
                             </div>
-                            <span style={{ fontSize: 9, fontFamily: "var(--font-body-mono)", color: "#111", whiteSpace: "nowrap" }}>{name}</span>
+                            <span style={{ fontSize: 9, fontWeight: 600, fontFamily: "var(--font-body-mono)", color: "#111", whiteSpace: "nowrap" }}>{name}</span>
                           </div>
                         ))}
                       </div>
