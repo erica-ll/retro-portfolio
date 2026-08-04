@@ -434,11 +434,14 @@ function ExpCard({ org, role, period, project, bullets }: {
           fontFamily: "var(--font-body-mono)",
         }}>{project}</div>
       )}
-      <ul style={{ margin: 0, paddingLeft: 16 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
         {bullets.map((b, i) => (
-          <li key={i} style={{ fontSize: 11, lineHeight: 1.5, color: "#222", marginBottom: 2 }}>{b}</li>
+          <div key={i} style={{ display: "flex", gap: 5, alignItems: "flex-start" }}>
+            <span style={{ fontSize: 8, color: "#666", flexShrink: 0, marginTop: 2 }}>▸</span>
+            <span style={{ fontSize: 11, lineHeight: 1.35, color: "#222" }}>{b}</span>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }
@@ -1259,7 +1262,7 @@ export default function Home() {
                           src="/download-btn.png"
                           alt="Download PDF"
                           draggable={false}
-                          style={{ width: 130, height: "auto", imageRendering: "pixelated", display: "block", filter: "drop-shadow(2px 3px 0px rgba(0,0,0,0.55))" }}
+                          style={{ width: 108, height: "auto", imageRendering: "pixelated", display: "block", filter: "drop-shadow(2px 3px 0px rgba(0,0,0,0.55))" }}
                         />
                       </a>
                     </div>
