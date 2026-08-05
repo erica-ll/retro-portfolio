@@ -151,7 +151,9 @@ function MacTitleBar({
     >
       {/* Left: close box */}
       {onClose && (
-        <button style={btnStyle} onClick={onClose} aria-label="Close" title="Close" />
+        <button style={btnStyle} onClick={onClose} aria-label="Close" title="Close">
+          <span style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", fontSize: 8, lineHeight: 1, color: "#1a1a1a", pointerEvents: "none", userSelect: "none" }}>×</span>
+        </button>
       )}
 
       {/* Center: stripe + title + stripe */}
