@@ -501,15 +501,12 @@ const MENUS = [
   },
 ];
 
-const PROJECT = {
-  id: "my-project",
-  title: "Creatures in TV",
-  description:
-    "A full-stack web application built with Next.js, TypeScript, and PostgreSQL. Features user authentication, real-time updates, and a responsive design.",
-  tech: ["Next.js", "TypeScript", "PostgreSQL", "Tailwind CSS"],
-  link: "https://github.com",
-  year: "2024",
-};
+// Root of the Projects window is grouped by category so an AI-focused vs.
+// game-dev-focused viewer only sees the folder relevant to them first.
+const PROJECT_CATEGORIES: { name: string; projects: string[] }[] = [
+  { name: "AI / ML", projects: ["Indie Help", "Creatures in TV"] },
+  { name: "Game Dev (Unity)", projects: ["VR Escape Room", "Zoo XR"] },
+];
 
 type SubWin = {
   id: string;
@@ -532,7 +529,9 @@ export default function Home() {
   const [documentsRestorePos,  setDocumentsRestorePos]  = useState({ x: 40, y: 18 });
   const [documentsSize,        setDocumentsSize]        = useState({ width: 400, height: 280 });
   const [subWins, setSubWins] = useState<SubWin[]>([]);
-  // Which project is currently viewed inside the Projects window (null = root)
+  // Which category folder is currently open inside the Projects window (null = root)
+  const [documentsCurrentCategory, setDocumentsCurrentCategory] = useState<string | null>(null);
+  // Which project is currently viewed inside the Projects window (null = category listing)
   const [documentsCurrentProject, setDocumentsCurrentProject] = useState<string | null>(null);
   const [activeWindow, setActiveWindow] = useState<string | null>(null);
   const [printerOpen,        setPrinterOpen]        = useState(false);
@@ -608,6 +607,12 @@ export default function Home() {
     setDocumentsOpen(true);
     setActiveWindow("documents");
     setSelectedIcon(null);
+  };
+
+  // Navigate Projects window into a category folder (no new SubWin — in-place navigation)
+  const openCategory = (categoryName: string) => {
+    setDocumentsCurrentCategory(categoryName);
+    setActiveWindow("documents");
   };
 
   // Navigate Projects window into a project folder (no new SubWin — in-place navigation)
@@ -980,7 +985,7 @@ export default function Home() {
             {documentsOpen && (
               <div onMouseDown={() => setActiveWindow("documents")} style={{ display: "contents" }}>
                 <Window
-                  title={documentsCurrentProject ?? "Projects"}
+                  title={documentsCurrentProject ?? documentsCurrentCategory ?? "Projects"}
                   active={activeWindow === "documents"}
                   draggable
                   resizable={!documentsCollapsed}
@@ -991,26 +996,44 @@ export default function Home() {
                   onResize={(size) => setDocumentsSize(size)}
                   titleBar={
                     <MacTitleBar
-                      title={documentsCurrentProject ?? "Projects"}
+                      title={documentsCurrentProject ?? documentsCurrentCategory ?? "Projects"}
                       onPositionChange={setDocumentsPos}
-                      onClose={() => { setDocumentsOpen(false); setDocumentsCurrentProject(null); setActiveWindow(null); setDocumentsCollapsed(false); setDocumentsMaximized(false); }}
+                      onClose={() => { setDocumentsOpen(false); setDocumentsCurrentProject(null); setDocumentsCurrentCategory(null); setActiveWindow(null); setDocumentsCollapsed(false); setDocumentsMaximized(false); }}
                       onCollapse={() => setDocumentsCollapsed(c => !c)}
                       onZoom={toggleMaximize}
                     />
                   }
                 >
-                  {documentsCurrentProject === null ? (
-                    /* Root: all project folders */
+                  {documentsCurrentCategory === null ? (
+                    /* Root: category folders */
                     <div style={{ flex: 1, overflowY: "auto", padding: 16, display: "grid", gridTemplateColumns: "repeat(auto-fill, 80px)", gap: "16px 12px", alignItems: "start", justifyContent: "start" }}>
-                      <IconButton icon={<FolderIcon />} label={PROJECT.title} labelPosition="bottom" size="lg"
-                        style={{ background: "transparent", border: "none", boxShadow: "none" }}
-                        onDoubleClick={(e) => { e.stopPropagation(); openProject("Creatures in TV"); }} />
-                      <IconButton icon={<FolderIcon />} label="VR Escape Room" labelPosition="bottom" size="lg"
-                        style={{ background: "transparent", border: "none", boxShadow: "none" }}
-                        onDoubleClick={(e) => { e.stopPropagation(); openProject("VR Escape Room"); }} />
-                      <IconButton icon={<FolderIcon />} label="Zoo XR" labelPosition="bottom" size="lg"
-                        style={{ background: "transparent", border: "none", boxShadow: "none" }}
-                        onDoubleClick={(e) => { e.stopPropagation(); openProject("Zoo XR"); }} />
+                      {PROJECT_CATEGORIES.map((category) => (
+                        <IconButton key={category.name} icon={<FolderIcon />} label={category.name} labelPosition="bottom" size="lg"
+                          style={{ background: "transparent", border: "none", boxShadow: "none" }}
+                          onDoubleClick={(e) => { e.stopPropagation(); openCategory(category.name); }} />
+                      ))}
+                    </div>
+                  ) : documentsCurrentProject === null ? (
+                    /* Category view: back button + project folders */
+                    <div style={{ position: "relative", height: "100%" }}>
+                      <button
+                        onClick={() => setDocumentsCurrentCategory(null)}
+                        style={{ position: "absolute", top: 10, left: 10, zIndex: 2, background: "none", border: "none", padding: 0, cursor: "pointer", display: "block" }}
+                      >
+                        <img
+                          src="/back-btn.png"
+                          alt="← Projects"
+                          draggable={false}
+                          style={{ height: 22, width: "auto", imageRendering: "pixelated", display: "block", filter: "drop-shadow(1px 2px 0px rgba(0,0,0,0.5))" }}
+                        />
+                      </button>
+                      <div style={{ height: "100%", overflowY: "auto", padding: "40px 16px 16px", display: "grid", gridTemplateColumns: "repeat(auto-fill, 80px)", gap: "16px 12px", alignItems: "start", justifyContent: "start" }}>
+                        {PROJECT_CATEGORIES.find(c => c.name === documentsCurrentCategory)?.projects.map((projectName) => (
+                          <IconButton key={projectName} icon={<FolderIcon />} label={projectName} labelPosition="bottom" size="lg"
+                            style={{ background: "transparent", border: "none", boxShadow: "none" }}
+                            onDoubleClick={(e) => { e.stopPropagation(); openProject(projectName); }} />
+                        ))}
+                      </div>
                     </div>
                   ) : (
                     /* Project view: back button + file icons */
@@ -1208,6 +1231,91 @@ export default function Home() {
 
                       <div style={{ borderTop: "1px solid #ddd", paddingTop: 10, fontSize: 9, color: "#666", lineHeight: 1.8 }}>
                         <div><strong>Tech Stack:</strong> Python | Gemini API | SAM2 (Computer Vision) | AWS ECS | Web Frontend (JS/HTML) | Generative AI</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Indie Help — about.txt */}
+                  {win.kind === "about" && win.projectName === "Indie Help" && (
+                    <div style={{ height: "100%", overflowY: "auto", padding: "14px 18px", fontFamily: "var(--font-body-mono)", fontSize: 10, letterSpacing: "-0.03em", color: "#222" }}>
+                      <h2 style={{ fontSize: 13, fontWeight: "bold", marginBottom: 3 }}>Indie Help</h2>
+                      <div style={{ fontSize: 10, color: "#888", marginBottom: 4, fontStyle: "italic" }}>LangGraph · Hybrid RAG · Grounded Q&amp;A System</div>
+                      <a
+                        href="https://github.com/erica-ll/indie-help"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ display: "inline-block", fontSize: 9, color: "#0000EE", textDecoration: "underline", marginBottom: 10 }}
+                      >
+                        github.com/erica-ll/indie-help ↗
+                      </a>
+                      <p style={{ lineHeight: 1.7, marginBottom: 14, color: "#333" }}>
+                        A retrieval-augmented question-answering system that gives indie game developers grounded advice
+                        pulled from GDC talk transcripts and developer post-mortems, with every claim traced back to a
+                        source file. If the knowledge base doesn&apos;t cover it, it says so instead of guessing.
+                      </p>
+
+                      {/* Pipeline diagram — box labels map 1:1 to Core Systems titles below */}
+                      <div style={{ fontSize: 9, fontWeight: "bold", letterSpacing: "0.08em", color: "#888", marginBottom: 6, textTransform: "uppercase" }}>Pipeline</div>
+                      <div style={{ display: "flex", alignItems: "center", overflowX: "auto", marginBottom: 14, paddingBottom: 4 }}>
+                        {[
+                          "Decompose\nQuery",
+                          "Hybrid\nRetrieval",
+                          "Cross-Encoder\nRerank",
+                          "Grounding &\nVerification",
+                          "Draft +\nCite",
+                        ].map((label, i, arr) => (
+                          <div key={label} style={{ display: "flex", alignItems: "center", flex: "0 0 auto" }}>
+                            <div style={{
+                              border: "1px solid #999",
+                              borderRadius: 3,
+                              background: "#f7f7f7",
+                              padding: "6px 10px",
+                              fontSize: 9,
+                              fontWeight: "bold",
+                              color: "#222",
+                              textAlign: "center",
+                              whiteSpace: "pre",
+                              lineHeight: 1.5,
+                            }}>
+                              {label}
+                            </div>
+                            {i < arr.length - 1 && (
+                              <span style={{ color: "#999", fontSize: 13, padding: "0 6px", flex: "0 0 auto" }}>→</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+
+                      <div style={{ fontSize: 9, fontWeight: "bold", letterSpacing: "0.08em", color: "#888", marginBottom: 6, textTransform: "uppercase" }}>Core Systems</div>
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontWeight: "bold", fontSize: 10, marginBottom: 4, color: "#111" }}>Hybrid Retrieval with Reciprocal Rank Fusion</div>
+                        <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Dense embeddings alone (text-embedding-3-small + Chroma) failed on proper nouns, retrieving semantically similar but factually wrong chunks. Fusing in bm25s lexical search via Reciprocal Rank Fusion raised average rubric scores from 5.43 to 6.86.</p>
+                      </div>
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontWeight: "bold", fontSize: 10, marginBottom: 4, color: "#111" }}>Cross-Encoder Reranking &amp; Self-Correcting Retry</div>
+                        <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Cohere&apos;s rerank-v4.0-fast reranks the fused candidates before they reach the answer pipeline. A self-correcting loop doubles top_k if the scan stage finds zero relevant chunks, falling back to an explicit refusal rather than a hallucinated answer.</p>
+                      </div>
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontWeight: "bold", fontSize: 10, marginBottom: 4, color: "#111" }}>Grounding &amp; Verification Stage</div>
+                        <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>A dedicated &ldquo;scan&rdquo; stage guarding retrieved texts before drafting, forcing the model to read chunks explicitly, extract verbatim evidence, and pass hard verification checks before any claim is allowed into the final answer.</p>
+                      </div>
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontWeight: "bold", fontSize: 10, marginBottom: 4, color: "#111" }}>Architecture Iteration</div>
+                        <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Four complete pipeline designs were built and rubric-scored head-to-head (<a href="https://github.com/erica-ll/indie-help/blob/main/docs/DESIGN_LOG.md" target="_blank" rel="noopener noreferrer" style={{ color: "#0000EE", textDecoration: "underline" }}>see details in github repo</a>) before settling on the architecture with an ~8.14 average score.</p>
+                      </div>
+                      <div style={{ marginBottom: 14 }}>
+                        <div style={{ fontWeight: "bold", fontSize: 10, marginBottom: 4, color: "#111" }}>Golden-Set Evaluation Harness</div>
+                        <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>A hand-written 27-question test set targets six failure modes: entity traps, cross-contamination between similar topics, multi-hop reasoning, conflicting source opinions, hypothetical generalization, and correct abstention. Offline Ragas evaluation scores 0.832 Faithfulness and 0.730 Answer Correctness.</p>
+                      </div>
+
+                      <div style={{ borderTop: "1px solid #ddd", paddingTop: 10, fontSize: 9, color: "#666", lineHeight: 1.8 }}>
+                        <div><strong>Tech Stack:</strong> Python | LangGraph | OpenAI (Embeddings + GPT-4o) | ChromaDB | bm25s | Cohere Rerank | Ragas | youtube-transcript-api</div>
+                        <div>
+                          Known limitations &amp; full design log:{" "}
+                          <a href="https://github.com/erica-ll/indie-help" target="_blank" rel="noopener noreferrer" style={{ color: "#0000EE", textDecoration: "underline" }}>
+                            GitHub repo
+                          </a>
+                        </div>
                       </div>
                     </div>
                   )}
