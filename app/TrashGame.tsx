@@ -150,11 +150,13 @@ export function TrashGame({ onClose }: { onClose: () => void }) {
   const playAreaRef = useRef<HTMLDivElement>(null);
   const binXRef = useRef(binX);
   const catchesRef = useRef(catches);
+  const livesRef = useRef(lives);
   const itemsRef = useRef<FallingItem[]>(items);
   const spawnTimerRef = useRef(0);
 
   useEffect(() => { binXRef.current = binX; }, [binX]);
   useEffect(() => { catchesRef.current = catches; }, [catches]);
+  useEffect(() => { livesRef.current = lives; }, [lives]);
   useEffect(() => { itemsRef.current = items; }, [items]);
 
   const resetGame = useCallback(() => {
@@ -163,6 +165,9 @@ export function TrashGame({ onClose }: { onClose: () => void }) {
     setCatches(0);
     setLives(CONFIG.LIVES);
     setStatus("playing");
+    catchesRef.current = 0;
+    livesRef.current = CONFIG.LIVES;
+    itemsRef.current = [];
     spawnTimerRef.current = 0;
   }, []);
 
@@ -219,8 +224,20 @@ export function TrashGame({ onClose }: { onClose: () => void }) {
 
       itemsRef.current = remaining;
       setItems(remaining);
-      if (caughtCount) setCatches(c => c + caughtCount);
-      if (missedCount) setLives(l => Math.max(0, l - missedCount));
+
+      // Update catches/lives — and derive win/lose right here, where the values
+      // actually change, instead of a separate effect that mirrors them into
+      // status (that pattern trips react-hooks/set-state-in-effect and is also
+      // just an extra render pass for no reason).
+      const newCatches = catchesRef.current + caughtCount;
+      const newLives = Math.max(0, livesRef.current - missedCount);
+      if (caughtCount) { catchesRef.current = newCatches; setCatches(newCatches); }
+      if (missedCount) { livesRef.current = newLives; setLives(newLives); }
+      if (newLives <= 0) {
+        setStatus("lost");
+      } else if (newCatches >= CONFIG.CATCHES_TO_WIN) {
+        setStatus("won");
+      }
 
       raf = requestAnimationFrame(tick);
     };
@@ -228,13 +245,6 @@ export function TrashGame({ onClose }: { onClose: () => void }) {
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, [status]);
-
-  // Win/lose check, separate from the loop so it reacts to state updates immediately.
-  useEffect(() => {
-    if (status !== "playing") return;
-    if (lives <= 0) setStatus("lost");
-    else if (catches >= CONFIG.CATCHES_TO_WIN) setStatus("won");
-  }, [catches, lives, status]);
 
   // The bin follows the mouse automatically for as long as the game window is
   // open — no click-and-hold needed. Accounts for the scale transform on the
