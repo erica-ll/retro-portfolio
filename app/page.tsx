@@ -7,6 +7,7 @@ import {
   Window,
   IconButton,
 } from "@liiift-studio/mac-os9-ui";
+import { TrashGame } from "./TrashGame";
 
 interface YTPlayer {
   destroy(): void;
@@ -85,12 +86,14 @@ function MacTitleBar({
   title,
   onPositionChange,
   onClose,
+  onBack,
   onCollapse,
   onZoom,
 }: {
   title: string;
   onPositionChange: (p: { x: number; y: number }) => void;
   onClose?: () => void;
+  onBack?: () => void;
   onCollapse?: () => void;
   onZoom?: () => void;
 }) {
@@ -149,10 +152,15 @@ function MacTitleBar({
         overflow: "hidden",
       }}
     >
-      {/* Left: close box */}
+      {/* Left: close box + back box */}
       {onClose && (
         <button style={btnStyle} onClick={onClose} aria-label="Close" title="Close">
           <span style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", fontSize: 11, lineHeight: 1, color: "#1a1a1a", pointerEvents: "none", userSelect: "none" }}>×</span>
+        </button>
+      )}
+      {onBack && (
+        <button style={btnStyle} onClick={onBack} aria-label="Back" title="Back">
+          <span style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", fontSize: 8, lineHeight: 1, color: "#1a1a1a", pointerEvents: "none", userSelect: "none" }}>◀</span>
         </button>
       )}
 
@@ -534,6 +542,7 @@ export default function Home() {
   // Which project is currently viewed inside the Projects window (null = category listing)
   const [documentsCurrentProject, setDocumentsCurrentProject] = useState<string | null>(null);
   const [activeWindow, setActiveWindow] = useState<string | null>(null);
+  const [trashGameOpen, setTrashGameOpen] = useState(false);
   const [printerOpen,        setPrinterOpen]        = useState(false);
   const [printerCollapsed,   setPrinterCollapsed]   = useState(false);
   const [printerMaximized,   setPrinterMaximized]   = useState(false);
@@ -551,9 +560,9 @@ export default function Home() {
   const [skillsOpen,        setSkillsOpen]        = useState(false);
   const [skillsCollapsed,   setSkillsCollapsed]   = useState(false);
   const [skillsMaximized,   setSkillsMaximized]   = useState(false);
-  const [skillsSize,        setSkillsSize]        = useState({ width: 460, height: 250 });
+  const [skillsSize,        setSkillsSize]        = useState({ width: 460, height: 246 });
   const [skillsPos,         setSkillsPos]         = useState({ x: 125, y: 100 });
-  const [skillsRestoreSize, setSkillsRestoreSize] = useState({ width: 460, height: 250 });
+  const [skillsRestoreSize, setSkillsRestoreSize] = useState({ width: 460, height: 246 });
   const [skillsRestorePos,  setSkillsRestorePos]  = useState({ x: 125, y: 100 });
   const [contactOpen,        setContactOpen]        = useState(false);
   const [contactCollapsed,   setContactCollapsed]   = useState(false);
@@ -898,6 +907,7 @@ export default function Home() {
                 label="Trash"
                 selected={selectedIcon === "trash"}
                 onSelect={() => setSelectedIcon("trash")}
+                onOpen={() => setTrashGameOpen(true)}
               />
               <DesktopIcon
                 src="/internet-location.png"
@@ -914,6 +924,8 @@ export default function Home() {
                 onOpen={openContact}
               />
             </div>
+
+            {trashGameOpen && <TrashGame onClose={() => setTrashGameOpen(false)} />}
 
             {/* Readme / About window */}
             {readmeOpen && (
@@ -999,6 +1011,13 @@ export default function Home() {
                       title={documentsCurrentProject ?? documentsCurrentCategory ?? "Projects"}
                       onPositionChange={setDocumentsPos}
                       onClose={() => { setDocumentsOpen(false); setDocumentsCurrentProject(null); setDocumentsCurrentCategory(null); setActiveWindow(null); setDocumentsCollapsed(false); setDocumentsMaximized(false); }}
+                      onBack={
+                        documentsCurrentProject !== null
+                          ? () => setDocumentsCurrentProject(null)
+                          : documentsCurrentCategory !== null
+                          ? () => setDocumentsCurrentCategory(null)
+                          : undefined
+                      }
                       onCollapse={() => setDocumentsCollapsed(c => !c)}
                       onZoom={toggleMaximize}
                     />
@@ -1014,57 +1033,31 @@ export default function Home() {
                       ))}
                     </div>
                   ) : documentsCurrentProject === null ? (
-                    /* Category view: back button + project folders */
-                    <div style={{ position: "relative", height: "100%" }}>
-                      <button
-                        onClick={() => setDocumentsCurrentCategory(null)}
-                        style={{ position: "absolute", top: 10, left: 10, zIndex: 2, background: "none", border: "none", padding: 0, cursor: "pointer", display: "block" }}
-                      >
-                        <img
-                          src="/back-btn.png"
-                          alt="← Projects"
-                          draggable={false}
-                          style={{ height: 22, width: "auto", imageRendering: "pixelated", display: "block", filter: "drop-shadow(1px 2px 0px rgba(0,0,0,0.5))" }}
-                        />
-                      </button>
-                      <div style={{ height: "100%", overflowY: "auto", padding: "40px 16px 16px", display: "grid", gridTemplateColumns: "repeat(auto-fill, 80px)", gap: "16px 12px", alignItems: "start", justifyContent: "start" }}>
-                        {PROJECT_CATEGORIES.find(c => c.name === documentsCurrentCategory)?.projects.map((projectName) => (
-                          <IconButton key={projectName} icon={<FolderIcon />} label={projectName} labelPosition="bottom" size="lg"
-                            style={{ background: "transparent", border: "none", boxShadow: "none" }}
-                            onDoubleClick={(e) => { e.stopPropagation(); openProject(projectName); }} />
-                        ))}
-                      </div>
+                    /* Category view: project folders (back is in the title bar) */
+                    <div style={{ flex: 1, overflowY: "auto", padding: 16, display: "grid", gridTemplateColumns: "repeat(auto-fill, 80px)", gap: "16px 12px", alignItems: "start", justifyContent: "start" }}>
+                      {PROJECT_CATEGORIES.find(c => c.name === documentsCurrentCategory)?.projects.map((projectName) => (
+                        <IconButton key={projectName} icon={<FolderIcon />} label={projectName} labelPosition="bottom" size="lg"
+                          style={{ background: "transparent", border: "none", boxShadow: "none" }}
+                          onDoubleClick={(e) => { e.stopPropagation(); openProject(projectName); }} />
+                      ))}
                     </div>
                   ) : (
-                    /* Project view: back button + file icons */
-                    <div style={{ position: "relative", height: "100%" }}>
-                      <button
-                        onClick={() => setDocumentsCurrentProject(null)}
-                        style={{ position: "absolute", top: 10, left: 10, zIndex: 2, background: "none", border: "none", padding: 0, cursor: "pointer", display: "block" }}
-                      >
-                        <img
-                          src="/back-btn.png"
-                          alt="← Projects"
-                          draggable={false}
-                          style={{ height: 22, width: "auto", imageRendering: "pixelated", display: "block", filter: "drop-shadow(1px 2px 0px rgba(0,0,0,0.5))" }}
-                        />
-                      </button>
-                      <div style={{ height: "100%", overflowY: "auto", padding: "40px 16px 16px", display: "grid", gridTemplateColumns: "repeat(auto-fill, 80px)", gap: "16px 12px", alignItems: "start", justifyContent: "start" }}>
+                    /* Project view: file icons (back is in the title bar) */
+                    <div style={{ flex: 1, overflowY: "auto", padding: 16, display: "grid", gridTemplateColumns: "repeat(auto-fill, 80px)", gap: "16px 12px", alignItems: "start", justifyContent: "start" }}>
+                      <IconButton
+                        icon={<img src="/readme-icon.png" width={40} height={40} alt="" draggable={false} />}
+                        label="about.txt" labelPosition="bottom" size="lg"
+                        style={{ background: "transparent", border: "none", boxShadow: "none" }}
+                        onDoubleClick={(e) => { e.stopPropagation(); openFileWindow(documentsCurrentProject, "about"); }}
+                      />
+                      {(documentsCurrentProject === "VR Escape Room" || documentsCurrentProject === "Zoo XR") && (
                         <IconButton
-                          icon={<img src="/readme-icon.png" width={40} height={40} alt="" draggable={false} />}
-                          label="about.txt" labelPosition="bottom" size="lg"
+                          icon={<VideoIcon />}
+                          label="demo.mp4" labelPosition="bottom" size="lg"
                           style={{ background: "transparent", border: "none", boxShadow: "none" }}
-                          onDoubleClick={(e) => { e.stopPropagation(); openFileWindow(documentsCurrentProject, "about"); }}
+                          onDoubleClick={(e) => { e.stopPropagation(); openFileWindow(documentsCurrentProject, "video"); }}
                         />
-                        {(documentsCurrentProject === "VR Escape Room" || documentsCurrentProject === "Zoo XR") && (
-                          <IconButton
-                            icon={<VideoIcon />}
-                            label="demo.mp4" labelPosition="bottom" size="lg"
-                            style={{ background: "transparent", border: "none", boxShadow: "none" }}
-                            onDoubleClick={(e) => { e.stopPropagation(); openFileWindow(documentsCurrentProject, "video"); }}
-                          />
-                        )}
-                      </div>
+                      )}
                     </div>
                   )}
                 </Window>
@@ -1380,35 +1373,45 @@ export default function Home() {
                   <div style={{ height: "100%", overflowY: "auto", padding: "12px 14px", fontFamily: "var(--font-body-mono)", fontSize: 12, color: "#111", letterSpacing: "-0.03em", background: "linear-gradient(180deg, #d4d4d4 0%, #c8c8c8 100%)" }}>
                     <div style={{ fontSize: 9, fontWeight: "bold", letterSpacing: "0.1em", color: "#fff", background: "#444", border: "2px solid #111", boxShadow: "inset 1px 1px 0 #888, inset -1px -1px 0 #222", padding: "2px 8px", marginBottom: 10, display: "inline-block" }}>EXPERIENCE</div>
                     <ExpCard
+                      org="Personal Project"
+                      role="AI Engineer"
+                      period="Aug 2026 – Sep 2026"
+                      project="Indie-Help: LLM-Powered RAG System for Game Development"
+                      bullets={[
+                        "Designed a hybrid retrieval system with dense embeddings + BM25, fused via Reciprocal Rank Fusion, Cohere cross-encoder reranking, and a dedicated verification stage that hard-rejects any LLM-claimed citation not verbatim-present in its source chunk, eliminating hallucinated citations architecturally.",
+                        "Architected a RAG pipeline in LangGraph with a self-correcting conditional retry edge, automatically expanding its search when zero grounded evidence is retrieved before falling back to abstention.",
+                        "Built and debugged an automated evaluation harness against a 27-question golden set engineered around six specific failure modes. Benchmarked against Ragas' default metrics and a custom rubric, the latter rising from 5.43 (a simple single-call RAG baseline) to 8.14 (refined pipeline).",
+                      ]}
+                    />
+                    <ExpCard
                       org="Columbia University"
                       role="Research Assistant"
-                      period="Jan 2026 – Present"
-                      project="Multimodal Text-to-Animation Pipeline"
+                      period="Jan 2026 – Aug 2026"
+                      project="Creatures in TV: Full-Stack Generative AI & Computer Vision Application"
                       bullets={[
-                        "Animating static images into 2.5D character motion via depth maps, segmentation labels, and natural language prompts",
-                        "Using image-to-video diffusion models for motion priors + skeletal rig extraction to isolate movement",
-                        "Reintegrating rigs back to the source image to preserve background and character fidelity",
+                        "Architected and deployed a full-stack multimodal web app on AWS ECS Express mode, orchestrating generative AI and advanced computer vision to dynamically composite sprite-sheet animations into spatially-aware environments.",
+                        "Implemented custom depth-sorting logic leveraging SAM2 spatial masks to dynamically assign precise Z-index layers, maintaining consistent and accurate occlusion whether 2D creatures pass in front of or behind real-world objects in the image.",
+                        "Designed and implemented a highly intuitive frontend interface that bridges complex CV backend pipelines, empowering users to interact with creature animations within their personal photos in real-time.",
                       ]}
                     />
                     <ExpCard
                       org="Linx Robot"
                       role="AI/ML Intern"
-                      period="Jun – Aug 2025"
+                      period="Jun 2025 – Aug 2025"
                       project="Generative AI Stereo Synthesis Pipeline"
                       bullets={[
-                        "End-to-end data generation pipeline using DDPMs to accelerate stereo camera R&D",
-                        "Strict conditioning controls → geometry- and pixel-accurate right-eye generation with minimal hallucinations",
-                        "Optimized 2K stereo synthesis under compute constraints; presented trade-off analyses cross-functionally",
+                        "Engineered an end-to-end image generation pipeline using state-of-the-art diffusion models to accelerate the company's stereo camera R&D by providing highly domain-specific training datasets. Implemented strict conditioning controls to minimize hallucinations and preserve left-eye features for geometry- and pixel-accurate right-eye generation.",
+                        "Optimized generative architectures for 2K stereo synthesis under strict compute limits, and presented technical trade-off analyses to drive cross-functional product decisions.",
                       ]}
                     />
                     <ExpCard
-                      org="UC Irvine"
+                      org="University of California, Irvine"
                       role="Research Assistant"
                       period="Jul 2024 – Aug 2025"
-                      project="Biomedical Image Segmentation"
+                      project="Biomedical Image Segmentation Architecture"
                       bullets={[
-                        "Cascaded 3D U-Net in PyTorch: sequential liver → tumor → resection prediction stages",
-                        "Co-authored accepted paper at IEEE ISBI 2026 on automated 3D segmentation for liver surgical planning",
+                        "Developed a cascaded 3D U-Net pipeline in PyTorch, designing a sequential learning architecture where each stage leveraged prior predictions (liver → tumor → resection).",
+                        "Co-authored an accepted paper for IEEE ISBI 2026 on benchmarking automated 3D segmentation models for liver surgical planning.",
                       ]}
                     />
                     <ExpCard
@@ -1469,10 +1472,12 @@ export default function Home() {
                       {
                         label: "ML / AI",
                         items: [
-                          { name: "Python",      icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" },
-                          { name: "PyTorch",     icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pytorch/pytorch-original.svg" },
-                          { name: "OpenCV",      icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/opencv/opencv-original.svg" },
-                          { name: "HuggingFace", icon: "/huggingface-icon.png" },
+                          { name: "Python",       icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" },
+                          { name: "OpenAI API",   icon: "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/openai.svg" },
+                          { name: "LangGraph",    icon: "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg/icons/langgraph-color.svg" },
+                          { name: "ChromaDB",     icon: null },
+                          { name: "PyTorch",      icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pytorch/pytorch-original.svg" },
+                          { name: "OpenCV",       icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/opencv/opencv-original.svg" },
                         ],
                       },
                       {
@@ -1486,12 +1491,10 @@ export default function Home() {
                       {
                         label: "Software / Web",
                         items: [
-                          { name: "React",      icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" },
-                          { name: "Next.js",    icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg" },
-                          { name: "TypeScript", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" },
-                          { name: "AWS",        icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/amazonwebservices/amazonwebservices-plain-wordmark.svg" },
+                          { name: "React.js",   icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" },
+                          { name: "AWS (ECS)",  icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/amazonwebservices/amazonwebservices-plain-wordmark.svg" },
                           { name: "C++",        icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg" },
-                          { name: "SQL",        icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg" },
+                          { name: "Docker",     icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" },
                         ],
                       },
                     ] as { label: string; items: { name: string; icon: string | null }[] }[]).map(({ label, items }) => (
