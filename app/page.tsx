@@ -1159,7 +1159,14 @@ export default function Home() {
                           <li>Calculates spatial relationships to ensure all enclosures are fully fenced and contain animals</li>
                           <li>Validates pathfinding connectivity leading to each enclosure and correct placement of food bins</li>
                         </ul>
-                        <div style={{ marginTop: 10, background: "#eee", border: "1px dashed #bbb", borderRadius: 3, padding: "18px 12px", textAlign: "center", color: "#999", fontSize: 9, letterSpacing: "0.06em" }}>[ CONSTRAINT VALIDATION SCREENSHOTS ]</div>
+                        <div style={{ display: "flex", justifyContent: "center" }}>
+                          <img
+                            src="/zoo-constraints-cropped.png"
+                            alt="Zoo XR constraint validation checklist overlay in the AR builder"
+                            draggable={false}
+                            style={{ marginTop: 10, maxWidth: 220, width: "100%", display: "block", border: "1px solid #ccc", borderRadius: 3 }}
+                          />
+                        </div>
                       </div>
                       <div style={{ marginBottom: 12 }}>
                         <div style={{ fontWeight: "bold", fontSize: 10, marginBottom: 4, color: "#111" }}>Spatial Anchoring &amp; Scaling (AR)</div>
@@ -1186,15 +1193,15 @@ export default function Home() {
                       <h2 style={{ fontSize: 13, fontWeight: "bold", marginBottom: 3 }}>Creatures in TV</h2>
                       <div style={{ fontSize: 10, color: "#888", marginBottom: 10, fontStyle: "italic" }}>Multimodal Text-to-Animation Pipeline</div>
                       <p style={{ lineHeight: 1.7, marginBottom: 14, color: "#333" }}>
-                        A full-stack, cloud-deployed AI application that transforms static 2D photos into dynamic animated scenes
-                        by bringing imaginative creatures into personal photos. By orchestrating generative AI models with advanced
+                        A full-stack, cloud-deployed AI application that transforms static personal (or any) photos into scenes
+                        where imaginative creatures come to life within. By orchestrating generative AI models with advanced
                         computer vision segmentation, the pipeline allows users to hatch custom creatures and direct their
                         interactions within a spatially-aware environment of their choice.
                       </p>
                       <div style={{ fontSize: 9, fontWeight: "bold", letterSpacing: "0.08em", color: "#888", marginBottom: 6, textTransform: "uppercase" }}>Core Systems</div>
                       <div style={{ marginBottom: 12 }}>
                         <div style={{ fontWeight: "bold", fontSize: 10, marginBottom: 4, color: "#111" }}>Generative Asset Pipeline</div>
-                        <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Integrated the Gemini API to dynamically generate creature concepts and corresponding multi-action sprite sheets from user text prompts.</p>
+                        <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Integrated the Gemini API to dynamically generate creature concepts and corresponding sprite sheets that handles creature animations from user text prompts.</p>
                       </div>
                       <div style={{ marginBottom: 12 }}>
                         <div style={{ fontWeight: "bold", fontSize: 10, marginBottom: 4, color: "#111" }}>Computer Vision &amp; Scene Processing</div>
@@ -1202,11 +1209,15 @@ export default function Home() {
                       </div>
                       <div style={{ marginBottom: 12 }}>
                         <div style={{ fontWeight: "bold", fontSize: 10, marginBottom: 4, color: "#111" }}>Algorithmic Trajectory &amp; Depth Logic</div>
-                        <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Developed an auto-pathing recommendation algorithm that analyzes scene masks to suggest realistic traversal routes. Implemented depth-sorting logic to ensure creatures seamlessly occlude or hide behind real-world objects in the photo.</p>
+                        <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Developed an auto-pathing recommendation algorithm that analyzes scene masks to suggest realistic traversal routes. Implemented depth-sorting logic to ensure creatures seamlessly occlude or hide behind real-world objects in the photo, with both auto paths or user-defined paths.</p>
                       </div>
                       <div style={{ marginBottom: 14 }}>
                         <div style={{ fontWeight: "bold", fontSize: 10, marginBottom: 4, color: "#111" }}>Cloud Infrastructure &amp; Deployment</div>
-                        <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Containerized the heavy machine-learning backend and web frontend, successfully deploying the end-to-end application on AWS ECS (Elastic Container Service) for public web access.</p>
+                        <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Containerized the heavy machine-learning backend and web frontend, successfully deploying the end-to-end application on AWS ECS (Elastic Container Service) for public web access. We also designed a very intuitive and interactive user interface!{" "}
+                          <a href="https://creaturesinthetv.github.io/" target="_blank" rel="noopener noreferrer" style={{ color: "#0000EE", textDecoration: "underline" }}>
+                            Check it out.
+                          </a>
+                        </p>
                       </div>
 
                       {/* Future Research — Mac OS "Note" box style */}
@@ -1256,7 +1267,7 @@ export default function Home() {
 
                       {/* Pipeline diagram — box labels map 1:1 to Core Systems titles below */}
                       <div style={{ fontSize: 9, fontWeight: "bold", letterSpacing: "0.08em", color: "#888", marginBottom: 6, textTransform: "uppercase" }}>Pipeline</div>
-                      <div style={{ display: "flex", alignItems: "center", overflowX: "auto", marginBottom: 14, paddingBottom: 4 }}>
+                      <div style={{ display: "flex", alignItems: "center", overflowX: "auto", marginBottom: 4, paddingBottom: 4 }}>
                         {[
                           "Decompose\nQuery",
                           "Hybrid\nRetrieval",
@@ -1285,6 +1296,22 @@ export default function Home() {
                           </div>
                         ))}
                       </div>
+                      <div style={{ display: "flex", justifyContent: "center", marginBottom: 14 }}>
+                        {/* <div style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 5,
+                          border: "1px dashed #bbb",
+                          borderRadius: 3,
+                          background: "#fafafa",
+                          padding: "3px 9px",
+                          fontSize: 9,
+                          color: "#777",
+                        }}>
+                          <span style={{ fontSize: 11, lineHeight: 1 }}>↺</span>
+                          LangGraph retry loop — 0 hits → 2&times; top_k → back to Hybrid Retrieval
+                        </div> */}
+                      </div>
 
                       <div style={{ fontSize: 9, fontWeight: "bold", letterSpacing: "0.08em", color: "#888", marginBottom: 6, textTransform: "uppercase" }}>Core Systems</div>
                       <div style={{ marginBottom: 12 }}>
@@ -1292,12 +1319,16 @@ export default function Home() {
                         <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Dense embeddings alone (text-embedding-3-small + Chroma) failed on proper nouns, retrieving semantically similar but factually wrong chunks. Fusing in bm25s lexical search via Reciprocal Rank Fusion raised average rubric scores from 5.43 to 6.86.</p>
                       </div>
                       <div style={{ marginBottom: 12 }}>
-                        <div style={{ fontWeight: "bold", fontSize: 10, marginBottom: 4, color: "#111" }}>Cross-Encoder Reranking &amp; Self-Correcting Retry</div>
-                        <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Cohere&apos;s rerank-v4.0-fast reranks the fused candidates before they reach the answer pipeline. A self-correcting loop doubles top_k if the scan stage finds zero relevant chunks, falling back to an explicit refusal rather than a hallucinated answer.</p>
+                        <div style={{ fontWeight: "bold", fontSize: 10, marginBottom: 4, color: "#111" }}>Cross-Encoder Reranking</div>
+                        <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>Cohere&apos;s rerank-v4.0-fast reranks the fused candidates before they reach the answer pipeline, pushing the most relevant chunks to the top before grounding even begins.</p>
                       </div>
                       <div style={{ marginBottom: 12 }}>
                         <div style={{ fontWeight: "bold", fontSize: 10, marginBottom: 4, color: "#111" }}>Grounding &amp; Verification Stage</div>
                         <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>A dedicated &ldquo;scan&rdquo; stage guarding retrieved texts before drafting, forcing the model to read chunks explicitly, extract verbatim evidence, and pass hard verification checks before any claim is allowed into the final answer.</p>
+                      </div>
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontWeight: "bold", fontSize: 10, marginBottom: 4, color: "#111" }}>LangGraph Self-Correcting Retry Loop</div>
+                        <p style={{ lineHeight: 1.7, color: "#444", margin: 0 }}>The pipeline runs as a LangGraph state graph, which is what makes automatic recovery possible: if the scan stage returns zero relevant chunks, the graph conditionally routes back to retrieval with top_k doubled and retries before falling back to an explicit refusal, no silent failure.</p>
                       </div>
                       <div style={{ marginBottom: 12 }}>
                         <div style={{ fontWeight: "bold", fontSize: 10, marginBottom: 4, color: "#111" }}>Architecture Iteration</div>
